@@ -1,0 +1,1411 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ML/DL Тренажёр v4.1 (Copy Button)</title>
+<script>window.MathJax={tex:{inlineMath:[['\\(','\\)']], displayMath:[['$$','$$']]}};</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.20.0/dist/tf.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;700&family=Manrope:wght@400;600&family=JetBrains+Mono:wght@400&display=swap');
+:root{--bg:#0a0e13;--panel:#111a25;--line:#1e2c3d;--txt:#e7eef5;--mut:#8ba1b6;--ac:#2dd4bf;--amber:#f5b942;--red:#f87171;--mono:'JetBrains Mono',monospace;--disp:'Space Grotesk',sans-serif;--body:'Manrope',sans-serif}
+*{box-sizing:border-box;margin:0;padding:0}body{background:var(--bg);color:var(--txt);font-family:var(--body);font-size:15px;line-height:1.6}
+header{position:sticky;top:0;z-index:50;display:flex;align-items:center;gap:18px;padding:12px 22px;background:rgba(10,14,19,.95);border-bottom:1px solid var(--line)}
+.logo{font-family:var(--disp);font-weight:700;font-size:19px}.logo span{font-size:10px;background:var(--ac);color:#000;padding:2px 6px;border-radius:4px;margin-left:8px}
+.wrap{display:flex;max-width:1600px;margin:0 auto}
+aside{width:280px;min-width:280px;padding:18px;border-right:1px solid var(--line);height:calc(100vh - 58px);overflow-y:auto;position:sticky;top:58px}
+main{flex:1;padding:26px 34px 100px}
+.navgroup summary{font-family:var(--disp);font-size:11px;text-transform:uppercase;color:#5c7186;cursor:pointer;padding:8px;list-style:none}
+.nlink{display:block;padding:6px 12px;margin:2px 0;border-radius:6px;color:var(--mut);text-decoration:none;font-size:13px;border-left:2px solid transparent}
+.nlink:hover{background:var(--panel);color:var(--txt)}.nlink.on{background:var(--panel);color:var(--ac);border-left-color:var(--ac)}
+section.topic{margin-bottom:80px;scroll-margin-top:80px}
+h2{font-family:var(--disp);font-size:32px;margin-bottom:12px;display:flex;align-items:center;gap:12px}
+h2 .num{font-size:13px;background:var(--ac);color:#000;padding:3px 9px;border-radius:5px}
+h3{font-family:var(--disp);font-size:20px;margin:28px 0 12px;color:var(--ac)}
+h4{font-family:var(--disp);font-size:16px;margin:18px 0 8px;color:var(--amber)}
+p{margin-bottom:10px;color:#c8d5e1}ul,ol{margin:0 0 12px 22px;color:#c8d5e1}li{margin-bottom:4px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;margin:16px 0}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px}
+.card h5{font-family:var(--disp);font-size:12px;text-transform:uppercase;color:var(--ac);margin-bottom:8px;letter-spacing:1px}
+.formula{background:#0e141c;border-left:3px solid var(--ac);padding:12px 16px;margin:12px 0;border-radius:0 8px 8px 0;overflow-x:auto}
+.warn{background:rgba(248,113,113,.08);border:1px solid rgba(248,113,113,.3);border-radius:10px;padding:14px 18px;margin:14px 0}
+.warn h5{color:var(--red);font-family:var(--disp);font-size:13px;text-transform:uppercase;margin-bottom:6px}
+.case{background:rgba(245,185,66,.06);border:1px solid rgba(245,185,66,.25);border-radius:10px;padding:14px 18px;margin:14px 0}
+.case h5{color:var(--amber);font-family:var(--disp);font-size:13px;text-transform:uppercase;margin-bottom:6px}
+.params{margin:14px 0}
+.params dt{font-family:var(--mono);font-size:13px;color:var(--ac);margin-top:8px}
+.params dd{font-size:13.5px;color:#c8d5e1;margin-left:0}
+.demo{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px;margin:18px 0}
+.demo h5{font-family:var(--disp);font-size:14px;margin-bottom:6px}
+.demo canvas{width:100%;background:#080c11;border-radius:8px;border:1px solid var(--line);display:block}
+.drow{display:flex;flex-wrap:wrap;gap:12px;margin-top:12px;align-items:flex-end}
+.ctl{display:flex;flex-direction:column;gap:2px;min-width:120px}
+.ctl label{font-size:10px;font-family:var(--mono);color:#5c7186;text-transform:uppercase}
+.ctl output{font-family:var(--mono);font-size:11px;color:var(--amber)}
+input[type=range]{accent-color:var(--ac);cursor:pointer}
+select,input[type=file],input[type=text],input[type=number]{background:#0e141c;border:1px solid var(--line);color:var(--txt);border-radius:6px;padding:6px 10px;font-family:var(--mono);font-size:12px}
+.btn{font-family:var(--disp);font-size:12px;font-weight:600;padding:7px 14px;border-radius:6px;cursor:pointer;border:1px solid var(--ac);background:transparent;color:var(--ac);transition:.2s}
+.btn:hover{background:var(--ac);color:#000}.btn.alt{border-color:var(--amber);color:var(--amber)}.btn.alt:hover{background:var(--amber);color:#000}
+.stats{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.stat{background:#0e141c;border:1px solid var(--line);border-radius:6px;padding:5px 10px;font-family:var(--mono);font-size:11px}
+.stat b{color:var(--ac)}
+
+/* CODE BLOCKS & COPY BUTTON */
+pre.code{background:#080c11;border:1px solid var(--line);border-radius:10px;padding:16px;margin:14px 0;overflow-x:auto;font-family:var(--mono);font-size:12.5px;line-height:1.6;position:relative}
+pre.code::before{content:attr(data-lang);position:absolute;top:0;right:0;font-size:9px;color:#5c7186;padding:3px 8px;border-bottom-left:6px solid var(--line);letter-spacing:1px;text-transform:uppercase;pointer-events:none}
+.k{color:#7dd3fc}.s{color:#a7e078}.c{color:#54677a;font-style:italic}.n{color:#f5b942}.f{color:#c4b5fd}
+
+.copy-btn{
+  position:absolute; top:8px; right:8px; z-index:10;
+  width:28px; height:28px; padding:0; margin:0;
+  background:rgba(17,26,37,0.8); border:1px solid var(--line); border-radius:6px;
+  cursor:pointer; display:flex; align-items:center; justify-content:center;
+  opacity:0; transition:opacity 0.2s, background 0.2s, border-color 0.2s;
+}
+pre.code:hover .copy-btn{opacity:1}
+.copy-btn:hover{background:var(--panel);border-color:var(--ac)}
+.copy-btn svg{width:16px;height:16px;fill:none;stroke:var(--mut);stroke-width:2;stroke-linecap:round;stroke-linejoin:round;transition:stroke 0.2s}
+.copy-btn:hover svg{stroke:var(--ac)}
+.copy-btn.copied svg{stroke:#34d399}
+
+table.tbl{width:100%;border-collapse:collapse;margin:12px 0;font-size:13px}
+table.tbl th{text-align:left;font-size:10px;text-transform:uppercase;color:var(--ac);padding:8px;border-bottom:1px solid var(--line)}
+table.tbl td{padding:8px;border-bottom:1px solid var(--line);color:#c8d5e1;vertical-align:top}
+.gridcols{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:900px){.gridcols{grid-template-columns:1fr}aside{display:none}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">ML/DL ТРЕНАЖЁР <span>v4.1</span></div>
+  <div style="margin-left:auto;font-size:12px;color:#5c7186">Теория · Формулы · Код · Демо · Экзамен</div>
+</header>
+
+<div class="wrap">
+<aside>
+  <div class="navgroup" open><summary>🤖 ML: Обучение с учителем</summary>
+    <a class="nlink" href="#t-linreg">01. Линейная регрессия</a>
+    <a class="nlink" href="#t-poly">02. Полиномы / SVR</a>
+    <a class="nlink" href="#t-logreg">03. Логистическая регрессия</a>
+    <a class="nlink" href="#t-svm">04. SVM</a>
+    <a class="nlink" href="#t-bayes">05. Наивный Байес</a>
+    <a class="nlink" href="#t-knn">06. k-NN</a>
+    <a class="nlink" href="#t-tree">07. Деревья решений</a>
+    <a class="nlink" href="#t-ens">08. Ансамбли (RF/Boost)</a>
+  </div>
+  <div class="navgroup" open><summary>🧩 ML: Без учителя</summary>
+    <a class="nlink" href="#t-clus">09. Кластеризация</a>
+    <a class="nlink" href="#t-dim">10. PCA / t-SNE / UMAP</a>
+    <a class="nlink" href="#t-apriori">11. Apriori</a>
+  </div>
+  <div class="navgroup" open><summary>🕹️ RL & DL Core</summary>
+    <a class="nlink" href="#t-rl">12. Q-Learning / DQN / PPO</a>
+    <a class="nlink" href="#t-core">13. Backprop / Оптимизаторы</a>
+    <a class="nlink" href="#t-cnn">14. CNN</a>
+    <a class="nlink" href="#t-rnn">15. RNN / LSTM</a>
+    <a class="nlink" href="#t-trf">16. Трансформеры / LLM</a>
+  </div>
+  <div class="navgroup" open><summary>🛠️ Практика</summary>
+    <a class="nlink" href="#t-pg">⚡ TF.js Playground</a>
+    <a class="nlink" href="#t-csv">📂 CSV Лаборатория</a>
+    <a class="nlink" href="#t-exam">🧪 Экзамен (RU)</a>
+  </div>
+</aside>
+
+<main>
+
+<!-- ============================================================ -->
+<!-- 01. ЛИНЕЙНАЯ РЕГРЕССИЯ -->
+<!-- ============================================================ -->
+<section class="topic" id="t-linreg">
+  <h2><span class="num">01</span>Линейная регрессия</h2>
+  <p class="sub">Базовая модель ML: предсказываем число как взвешенную сумму признаков. Фундамент, на котором стоит всё остальное.</p>
+
+  <div class="cards">
+    <div class="card"><h5>💡 Интуиция</h5><p>Проводим прямую (или гиперплоскость) сквозь облако точек так, чтобы сумма квадратов ошибок по вертикали была минимальна. Квадрат штрафует большие промахи сильнее и даёт гладкую функцию с единственным минимумом.</p></div>
+    <div class="card"><h5>📐 Модель и MSE</h5>
+      <div class="formula">$$\hat{y} = w^\top x + b, \quad \mathrm{MSE}=\frac{1}{n}\sum_{i=1}^{n}(y_i-\hat{y}_i)^2$$</div>
+      <p class="mini">Каждый вес \(w_j\) — вклад j-го признака в предсказание (в единицах целевой переменной).</p></div>
+    <div class="card"><h5>⚙️ Градиентный спуск</h5>
+      <div class="formula">$$\nabla_w \mathrm{MSE} = -\frac{2}{n}X^\top(y-Xw)$$</div>
+      <p class="mini">\(w \leftarrow w - \eta \nabla_w\). Идём антиградиенту — направление наискорейшего убывания потерь.</p></div>
+    <div class="card"><h5>🎯 Аналитическое решение</h5>
+      <div class="formula">$$w^* = (X^\top X)^{-1}X^\top y$$</div>
+      <p class="mini">Нормальные уравнения. Работает мгновенно для малых данных. При \(p>n\) или мультиколлинеарности матрица необратима → Ridge.</p></div>
+  </div>
+
+  <h3>🛡️ Регуляризация: Ridge / Lasso / ElasticNet</h3>
+  <p>Большие веса = переобучение. Регуляризация добавляет штраф за величину весов:</p>
+  <div class="formula">$$\text{Ridge (L2): }+\lambda\|w\|_2^2 \qquad \text{Lasso (L1): }+\lambda\|w\|_1 \qquad \text{ElasticNet: }\lambda_1\|w\|_1+\lambda_2\|w\|_2^2$$</div>
+  <div class="cards">
+    <div class="card"><h5>Ridge (L2)</h5><p>Сжимает все веса равномерно, но не обнуляет. Штраф — круг. Решение = касание эллипса MSE с кругом. Стабилизирует при коррелированных признаках.</p></div>
+    <div class="card"><h5>Lasso (L1)</h5><p>Штраф — ромб с углами на осях. Эллипс касается угла ⇒ часть весов <b>ровно 0</b>. Встроенный отбор признаков!</p></div>
+    <div class="card"><h5>ElasticNet</h5><p>Компромисс: L1 даёт разреженность, L2 стабилизирует. Параметр <code>l1_ratio</code> управляет балансом.</p></div>
+  </div>
+
+  <h3>🎮 Демо: Градиентный спуск + Геометрия регуляризации</h3>
+  <div class="demo">
+    <h5>Слева: GD вживую. Справа: Ridge (круг) vs Lasso (ромб)</h5>
+    <canvas id="lr_cv" width="800" height="280"></canvas>
+    <div class="drow">
+      <div class="ctl"><label>Шум σ</label><input type="range" id="lr_noise" min="0" max="3" step="0.1" value="1"><output id="lr_noise_v"></output></div>
+      <div class="ctl"><label>Learning Rate η</label><input type="range" id="lr_lr" min="0.01" max="0.3" step="0.01" value="0.08"><output id="lr_lr_v"></output></div>
+      <button class="btn" onclick="lrStep()">Шаг GD</button>
+      <button class="btn alt" onclick="lrOLS()">OLS (аналитически)</button>
+      <button class="btn" onclick="lrReset()">Сброс</button>
+    </div>
+    <div class="stats" id="lr_stats"></div>
+  </div>
+  <div class="demo">
+    <h5>Геометрия: жёлтая = OLS, зелёная = регуляризованное решение</h5>
+    <canvas id="rg_cv" width="800" height="300"></canvas>
+    <div class="drow">
+      <div class="ctl"><label>Тип штрафа</label><select id="rg_type"><option value="l2">Ridge (L2 — круг)</option><option value="l1">Lasso (L1 — ромб)</option></select></div>
+      <div class="ctl"><label>λ (сила)</label><input type="range" id="rg_lam" min="0" max="1" step="0.01" value="0.4"><output id="rg_lam_v"></output></div>
+    </div>
+    <div class="stats" id="rg_stats"></div>
+  </div>
+
+  <h3>🐍 Python</h3>
+<pre class="code" data-lang="sklearn · линейная регрессия">
+<span class="k">from</span> sklearn.linear_model <span class="k">import</span> LinearRegression, Ridge, Lasso, ElasticNet
+<span class="k">from</span> sklearn.preprocessing <span class="k">import</span> StandardScaler
+<span class="k">from</span> sklearn.metrics <span class="k">import</span> mean_squared_error, r2_score
+
+sc = StandardScaler().fit(X_tr)          <span class="c"># ОБЯЗАТЕЛЬНО для Ridge/Lasso!</span>
+model = Ridge(alpha=<span class="n">1.0</span>).fit(sc.transform(X_tr), y_tr)
+pred = model.predict(sc.transform(X_te))
+
+<span class="f">print</span>(<span class="s">"RMSE:"</span>, mean_squared_error(y_te, pred, squared=<span class="k">False</span>))
+<span class="f">print</span>(<span class="s">"R²  :"</span>, r2_score(y_te, pred))
+<span class="f">print</span>(<span class="s">"w   :"</span>, model.coef_)             <span class="c"># Lasso обнулит слабые признаки</span>
+</pre>
+
+  <h4>🔧 Параметры модели</h4>
+  <dl class="params">
+    <dt>alpha (λ)</dt><dd>Сила регуляризации. 0 = обычная регрессия, больше → сильнее сжатие весов. Подбирают через CV.</dd>
+    <dt>l1_ratio (ElasticNet)</dt><dd>Доля L1-штрафа. 1.0 = чистый Lasso, 0.0 = чистый Ridge, 0.5 = баланс.</dd>
+    <dt>fit_intercept</dt><dd>Считать ли свободный член b отдельно (обычно True).</dd>
+  </dl>
+
+  <div class="warn"><h5>⚠️ Ограничения и опасности</h5>
+    <ul><li><b>Линейность:</b> не ловит нелинейные зависимости без полиномиальных признаков.</li>
+    <li><b>Мультиколлинеарность:</b> скоррелированные признаки делают веса нестабильными → используйте Ridge или PCA.</li>
+    <li><b>Выбросы:</b> MSE чувствительна к выбросам → RobustRegressor или Huber loss.</li>
+    <li><b>Масштаб:</b> перед Lasso/Ridge <b>обязательно</b> стандартизируйте признаки!</li></ul>
+  </div>
+
+  <div class="case"><h5>🏙️ Кейс: прогноз стоимости квартир</h5>
+    <p>12 признаков, Lasso обнулил 4 малоинформативных, R² = 0.81. Коэффициенты интерпретируемы: +9 800 ₽/м² в центре, −420 ₽/м² за год возраста. Бизнес понимает модель → доверие выше, чем к чёрному ящику.</p>
+  </div>
+
+  <h4>Метрики регрессии</h4>
+  <table class="tbl">
+    <tr><th>Метрика</th><th>Формула</th><th>Когда смотреть</th></tr>
+    <tr><td><code>MAE</code></td><td>\(\frac{1}{n}\sum|y-\hat y|\)</td><td>«Средняя ошибка в рублях», робастна</td></tr>
+    <tr><td><code>RMSE</code></td><td>\(\sqrt{\mathrm{MSE}}\)</td><td>Штрафует крупные промахи</td></tr>
+    <tr><td><code>R²</code></td><td>\(1-SS_{res}/SS_{tot}\)</td><td>Доля объяснённой дисперсии</td></tr>
+  </table>
+</section>
+
+<!-- ============================================================ -->
+<!-- 02. ПОЛИНОМЫ / SVR -->
+<!-- ============================================================ -->
+<section class="topic" id="t-poly">
+  <h2><span class="num">02</span>Полиномиальная регрессия · SVR</h2>
+  <p>Как моделировать нелинейность, оставаясь «линейной» моделью, и как SVR использует ε-трубку.</p>
+
+  <div class="cards">
+    <div class="card"><h5>💡 Полиномы</h5><p>Добавляем степени: \(x\to(x,x^2,x^3)\). Модель линейна <b>по параметрам</b>, но кривая в исходном пространстве. Степень — главный гиперпараметр: мала → недообучение, велика → переобучение.</p></div>
+    <div class="card"><h5>📐 SVR (ε-Support Vector Regression)</h5>
+      <div class="formula">$$\min\tfrac12\|w\|^2+C\sum(\xi_i+\xi_i^*)$$</div>
+      <p class="mini">Ошибки внутри трубки ±ε <b>не штрафуются</b>. Обучаются только точки на границе (опорные). Ядра дают нелинейность.</p></div>
+  </div>
+
+  <h3>🎮 Демо: Переобучение полиномов</h3>
+  <div class="demo">
+    <canvas id="pl_cv" width="800" height="280"></canvas>
+    <div class="drow">
+      <div class="ctl"><label>Степень</label><input type="range" id="pl_deg" min="1" max="12" step="1" value="2"><output id="pl_deg_v"></output></div>
+      <button class="btn" onclick="plRegen()">Новые данные</button>
+    </div>
+    <div class="stats" id="pl_stats"></div>
+  </div>
+
+  <h3>🐍 Python</h3>
+<pre class="code" data-lang="sklearn · полиномы + SVR">
+<span class="k">from</span> sklearn.preprocessing <span class="k">import</span> PolynomialFeatures
+<span class="k">from</span> sklearn.pipeline <span class="k">import</span> make_pipeline
+<span class="k">from</span> sklearn.svm <span class="k">import</span> SVR
+
+poly = make_pipeline(PolynomialFeatures(degree=<span class="n">3</span>), Ridge())
+svr  = SVR(kernel=<span class="s">"rbf"</span>, C=<span class="n">10</span>, epsilon=<span class="n">0.1</span>, gamma=<span class="s">"scale"</span>)
+</pre>
+
+  <h4>🔧 Параметры SVR</h4>
+  <dl class="params">
+    <dt>C</dt><dd>Жёсткость: большое C → узкая трубка, меньше ошибок на обучении, риск переобучения.</dd>
+    <dt>epsilon (ε)</dt><dd>Ширина трубки «безразличия». Больше ε → более гладкая модель, меньше опорных векторов.</dd>
+    <dt>kernel</dt><dd><code>linear</code>, <code>rbf</code>, <code>poly</code>. RBF — универсальный выбор по умолчанию.</dd>
+    <dt>gamma</dt><dd>Обратный радиус влияния RBF-ядра. Большое → каждый образец влияет локально.</dd>
+  </dl>
+
+  <div class="warn"><h5>⚠️ Ограничения</h5>
+    <ul><li>Полиномы высокой степени численно нестабильны → всегда нормализуйте x в [-1, 1].</li>
+    <li>SVR масштабируется плохо (\(O(n^2..n^3)\)) → для n&gt;10k используйте SGDRegressor или Nyström.</li>
+    <li>SVR чувствителен к масштабу → StandardScaler обязателен.</li></ul>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 03. ЛОГИСТИЧЕСКАЯ РЕГРЕССИЯ -->
+<!-- ============================================================ -->
+<section class="topic" id="t-logreg">
+  <h2><span class="num">03</span>Логистическая регрессия</h2>
+  <p>Несмотря на название — <b>классификатор</b>. Возвращает вероятность класса. Рабочая лошадка продакшена.</p>
+
+  <div class="cards">
+    <div class="card"><h5>💡 Сигмоида</h5>
+      <div class="formula">$$\sigma(z)=\frac{1}{1+e^{-z}},\quad z=w^\top x+b$$</div>
+      <p class="mini">Сжимает \((-\infty,+\infty)\) в \((0,1)\). Порог 0.5 → класс 1. Можно двигать порог под задачу.</p></div>
+    <div class="card"><h5>📐 Cross-Entropy Loss</h5>
+      <div class="formula">$$L=-\frac{1}{n}\sum[y_i\ln p_i+(1-y_i)\ln(1-p_i)]$$</div>
+      <p class="mini">Градиент красивый: \(\nabla_w L = \frac{1}{n}X^\top(\sigma(Xw)-y)\). MSE здесь дала бы плоские градиенты.</p></div>
+  </div>
+
+  <h3>🎮 Демо: Граница решения + обучение</h3>
+  <div class="demo">
+    <canvas id="lg_cv" width="800" height="300"></canvas>
+    <div class="drow">
+      <div class="ctl"><label>w₁</label><input type="range" id="lg_w1" min="-4" max="4" step="0.1" value="1"><output id="lg_w1_v"></output></div>
+      <div class="ctl"><label>w₂</label><input type="range" id="lg_w2" min="-4" max="4" step="0.1" value="1"><output id="lg_w2_v"></output></div>
+      <div class="ctl"><label>b</label><input type="range" id="lg_b" min="-3" max="3" step="0.1" value="0"><output id="lg_b_v"></output></div>
+      <button class="btn" onclick="lgTrain()">Обучить GD</button>
+      <button class="btn" onclick="lgReset()">Сброс</button>
+    </div>
+    <div class="stats" id="lg_stats"></div>
+    <p class="mini" style="margin-top:8px;color:#5c7186">💡 Кликай по холсту — добавить точку. Shift+Click = класс 0.</p>
+  </div>
+
+  <h3>🐍 Python</h3>
+<pre class="code" data-lang="sklearn · логистическая регрессия">
+<span class="k">from</span> sklearn.linear_model <span class="k">import</span> LogisticRegression
+clf = LogisticRegression(C=<span class="n">1.0</span>, penalty=<span class="s">"l2"</span>, class_weight=<span class="s">"balanced"</span>, max_iter=<span class="n">1000</span>)
+clf.fit(X_tr, y_tr)
+p = clf.predict_proba(X_te)[:, <span class="n">1</span>]     <span class="c"># вероятности!</span>
+</pre>
+
+  <h4>🔧 Параметры</h4>
+  <dl class="params">
+    <dt>C</dt><dd>Обратная сила регуляризации (C=1/λ). Меньше C → сильнее регуляризация.</dd>
+    <dt>penalty</dt><dd><code>l1</code>, <code>l2</code>, <code>elasticnet</code>, <code>none</code>.</dd>
+    <dt>class_weight</dt><dd><code>"balanced"</code> автоматически компенсирует дисбаланс классов.</dd>
+    <dt>solver</dt><dd><code>lbfgs</code> (дефолт), <code>saga</code> (для l1 и больших данных), <code>liblinear</code> (малые данные).</dd>
+  </dl>
+
+  <div class="warn"><h5>⚠️ Ограничения</h5>
+    <ul><li>Линейная граница → не справится с XOR без признаков-взаимодействий.</li>
+    <li>Предполагает линейную разделимость в log-odds пространстве.</li>
+    <li>Мультиколлинеарность делает коэффициенты нестабильными (но предсказания остаются ок).</li></ul>
+  </div>
+
+  <div class="case"><h5>💳 Кейс: Антифрод</h5>
+    <p>0.4% мошеннических транзакций. LogReg + class_weight="balanced" + порог 0.25: recall 0.86, precision 0.31. Топ-факторы: ночное время ×2.4, смена устройства ×3.1. Модель объяснима для регулятора.</p>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 04. SVM -->
+<!-- ============================================================ -->
+<section class="topic" id="t-svm">
+  <h2><span class="num">04</span>SVM — Метод опорных векторов</h2>
+  <p>Разделяем классы с <b>максимальным зазором</b>. Решение определяется несколькими «опорными» точками.</p>
+
+  <div class="cards">
+    <div class="card"><h5>💡 Максимальный отступ</h5>
+      <div class="formula">$$\text{margin}=\frac{2}{\|w\|}\Rightarrow\min\tfrac12\|w\|^2$$</div>
+      <p class="mini">Выпуклая задача → единственный глобальный минимум. Опорные векторы — точки на границах полосы.</p></div>
+    <div class="card"><h5>🔩 Soft Margin + Ядра</h5>
+      <div class="formula">$$\min\tfrac12\|w\|^2+C\sum\xi_i,\quad K(x,x')=e^{-\gamma\|x-x'\|^2}$$</div>
+      <p class="mini">C контролирует компромисс зазор/ошибки. Ядерный трюк: нелинейное разделение без явного φ(x).</p></div>
+  </div>
+
+  <h3>🎮 Демо: Зазор и параметр C</h3>
+  <div class="demo">
+    <canvas id="sv_cv" width="800" height="300"></canvas>
+    <div class="drow">
+      <div class="ctl"><label>C (log₁₀)</label><input type="range" id="sv_c" min="-2" max="3" step="0.1" value="1"><output id="sv_c_v"></output></div>
+      <button class="btn" onclick="svTrain()">Переобучить</button>
+    </div>
+    <div class="stats" id="sv_stats"></div>
+  </div>
+
+  <h3>🐍 Python</h3>
+<pre class="code" data-lang="sklearn · SVM">
+<span class="k">from</span> sklearn.svm <span class="k">import</span> SVC
+<span class="k">from</span> sklearn.preprocessing <span class="k">import</span> StandardScaler
+pipe = make_pipeline(StandardScaler(), SVC(kernel=<span class="s">"rbf"</span>, C=<span class="n">10</span>, gamma=<span class="s">"scale"</span>))
+<span class="c"># ВСЕГДА стандартизуй перед SVM!</span>
+</pre>
+
+  <h4>🔧 Параметры</h4>
+  <dl class="params">
+    <dt>C</dt><dd>Большое C → жёсткий зазор, меньше ошибок на train, риск переобучения. Малое C → широкий зазор, робастнее.</dd>
+    <dt>kernel</dt><dd><code>linear</code> (тексты, высокие размерности), <code>rbf</code> (универсал), <code>poly</code>.</dd>
+    <dt>gamma</dt><dd>Для RBF: <code>"scale"</code> = 1/(n_features·var), <code>"auto"</code> = 1/n_features.</dd>
+  </dl>
+
+  <div class="warn"><h5>⚠️ Ограничения</h5>
+    <ul><li>Плохо масштабируется: \(O(n^2..n^3)\) → для n&gt;50k используйте LinearSVC или SGDClassifier.</li>
+    <li>Не выдаёт вероятности «из коробки» (нужен Platt scaling, <code>probability=True</code> — медленно).</li>
+    <li>Чувствителен к масштабу и выбросам при большом C.</li>
+    <li>Не работает с категориальными признаками напрямую.</li></ul>
+  </div>
+
+  <div class="case"><h5>🧬 Кейс: Классификация текстов</h5>
+    <p>TF-IDF 40 000 признаков, 20 000 документов. LinearSVM (C=1) → accuracy 0.91 за секунды. Классика высокоразмерных разреженных данных.</p>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 05. НАИВНЫЙ БАЙЕС -->
+<!-- ============================================================ -->
+<section class="topic" id="t-bayes">
+  <h2><span class="num">05</span>Наивный Байес</h2>
+  <p>Теорема Байеса + предположение о независимости признаков. Мгновенное обучение, силён на текстах.</p>
+
+  <div class="cards">
+    <div class="card"><h5>📐 Теорема Байеса</h5>
+      <div class="formula">$$P(y|x)\propto P(y)\prod_j P(x_j|y)$$</div>
+      <p class="mini">«Наивность» = независимость признаков при данном классе. Неправда, но для ранжирования работает!</p></div>
+    <div class="card"><h5>Варианты</h5>
+      <p><b>GaussianNB</b> — непрерывные признаки (нормальное распределение).<br>
+      <b>MultinomialNB</b> — частоты/счётчики (тексты).<br>
+      <b>BernoulliNB</b> — бинарные признаки.<br>
+      Сглаживание Лапласа (<code>alpha</code>) спасает от нулевых вероятностей.</p></div>
+  </div>
+
+  <h3>🎮 Демо: Два гауссиана и граница Байеса</h3>
+  <div class="demo">
+    <canvas id="nb_cv" width="800" height="300"></canvas>
+    <div class="drow">
+      <div class="ctl"><label>μA.x</label><input type="range" id="nb_m1" min="-2" max="2" step="0.1" value="-1"><output id="nb_m1_v"></output></div>
+      <div class="ctl"><label>σA</label><input type="range" id="nb_s1" min="0.2" max="1.5" step="0.05" value="0.6"><output id="nb_s1_v"></output></div>
+      <div class="ctl"><label>P(A)</label><input type="range" id="nb_pa" min="0.1" max="0.9" step="0.05" value="0.5"><output id="nb_pa_v"></output></div>
+    </div>
+    <div class="stats" id="nb_stats"></div>
+  </div>
+
+  <h3>🐍 Python</h3>
+<pre class="code" data-lang="sklearn · Naive Bayes">
+<span class="k">from</span> sklearn.naive_bayes <span class="k">import</span> GaussianNB, MultinomialNB
+gnb = GaussianNB().fit(X_tr, y_tr)
+mnb = MultinomialNB(alpha=<span class="n">1.0</span>).fit(X_counts, y)  <span class="c"># alpha = сглаживание</span>
+</pre>
+
+  <h4>🔧 Параметры</h4>
+  <dl class="params">
+    <dt>alpha (Multinomial/Bernoulli)</dt><dd>Сглаживание Лапласа. 1.0 = стандарт, 0 = без сглаживания (риск нулей).</dd>
+    <dt>var_smoothing (Gaussian)</dt><dd>Добавляется к дисперсии для численной стабильности.</dd>
+  </dl>
+
+  <div class="warn"><h5>⚠️ Ограничения</h5>
+    <ul><li>Предположение независимости почти никогда не выполняется → калибровка вероятностей плохая.</li>
+    <li>GaussianNB предполагает нормальность → если признаки скошены, преобразуйте или используйте Kernel NB.</li>
+    <li>Плохо работает с коррелированными признаками (двойной учёт информации).</li></ul>
+  </div>
+
+  <div class="case"><h5>📧 Кейс: Спам-фильтр</h5>
+    <p>MultinomialNB на мешке слов: обучение за 0.3 сек на 50k писмах, precision 0.97. Базовый фильтр в стекинге с логрегом.</p>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 06. K-NN -->
+<!-- ============================================================ -->
+<section class="topic" id="t-knn">
+  <h2><span class="num">06</span>k-NN — Метод ближайших соседей</h2>
+  <p>Модель = сами данные. Ленивое обучение: запоминаем train, предсказываем голосованием k соседей.</p>
+
+  <div class="cards">
+    <div class="card"><h5>💡 Алгоритм</h5>
+      <div class="formula">$$d_p(a,b)=\Big(\sum_j|a_j-b_j|^p\Big)^{1/p}$$</div>
+      <p class="mini">k=1 → рваная граница, шум. Большое k → гладко, но размывает. Масштабирование <b>обязательно</b>!</p></div>
+    <div class="card"><h5>⚠️ Проклятие размерности</h5>
+      <p>В высоких размерностях все точки равноудалены → «ближайшие» теряют смысл. Перед k-NN: PCA или отбор признаков.</p></div>
+  </div>
+
+  <h3>🎮 Демо: k-NN с картой решений</h3>
+  <div class="demo">
+    <canvas id="kn_cv" width="800" height="300"></canvas>
+    <div class="drow">
+      <div class="ctl"><label>k</label><input type="range" id="kn_k" min="1" max="25" step="2" value="5"><output id="kn_k_v"></output></div>
+      <button class="btn" onclick="knRegions()">Карта решений</button>
+      <button class="btn" onclick="knClear()">Очистить запросы</button>
+    </div>
+    <div class="stats" id="kn_stats"></div>
+  </div>
+
+  <h3>🐍 Python</h3>
+<pre class="code" data-lang="sklearn · k-NN">
+<span class="k">from</span> sklearn.neighbors <span class="k">import</span> KNeighborsClassifier
+knn = KNeighborsClassifier(n_neighbors=<span class="n">7</span>, weights=<span class="s">"distance"</span>, metric=<span class="s">"minkowski"</span>, p=<span class="n">2</span>)
+<span class="c"># ОБЯЗАТЕЛЬНО: StandardScaler перед fit!</span>
+</pre>
+
+  <h4>🔧 Параметры</h4>
+  <dl class="params">
+    <dt>n_neighbors (k)</dt><dd>Главный гиперпараметр. Нечётное для бинарной классификации. Подбирают через CV.</dd>
+    <dt>weights</dt><dd><code>"uniform"</code> — все равны, <code>"distance"</code> — ближние весят больше (рекомендуется).</dd>
+    <dt>metric / p</dt><dd>p=2 евклидова, p=1 манхэттен. Для текстов — косинусная.</dd>
+    <dt>algorithm</dt><dd><code>"auto"</code> выбирает между ball_tree, kd_tree и brute.</dd>
+  </dl>
+
+  <div class="warn"><h5>⚠️ Ограничения</h5>
+    <ul><li>Медленное предсказание: \(O(n \cdot d)\) на один запрос. KD-tree помогает, но не в высоких размерностях.</li>
+    <li>Хранит весь train в памяти.</li>
+    <li>Категориальные признаки требуют специального расстояния или one-hot + масштабирования.</li>
+    <li>Чувствителен к нерелевантным признакам → отбор обязателен.</li></ul>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 07. ДЕРЕВЬЯ РЕШЕНИЙ -->
+<!-- ============================================================ -->
+<section class="topic" id="t-tree">
+  <h2><span class="num">07</span>Деревья решений</h2>
+  <p>Игра в «20 вопросов»: оси-параллельные разбиения. Интерпретируемы, не требуют масштабирования, ловят нелинейности.</p>
+
+  <div class="cards">
+    <div class="card"><h5>📐 Критерии нечистоты</h5>
+      <div class="formula">$$\text{Gini}=1-\sum p_k^2\qquad H=-\sum p_k\log_2 p_k$$</div>
+      <p class="mini">Оба минимальны (0) в чистом листе. Жадный выбор сплита по максимальному Gain.</p></div>
+    <div class="card"><h5>⚠️ Переобучение</h5>
+      <p>Без ограничений дерево запомнит всю выборку. Лечат: max_depth, min_samples_leaf, pruning… или ансамбли.</p></div>
+  </div>
+
+  <h3>🎮 Демо: Глубина = переобучение</h3>
+  <div class="demo">
+    <canvas id="tr_cv" width="800" height="300"></canvas>
+    <div class="drow">
+      <div class="ctl"><label>max_depth</label><input type="range" id="tr_d" min="1" max="7" step="1" value="2"><output id="tr_d_v"></output></div>
+      <button class="btn" onclick="trData()">Новые данные</button>
+    </div>
+    <div class="stats" id="tr_stats"></div>
+  </div>
+
+  <h3>🐍 Python</h3>
+<pre class="code" data-lang="sklearn · Decision Tree">
+<span class="k">from</span> sklearn.tree <span class="k">import</span> DecisionTreeClassifier
+tree = DecisionTreeClassifier(max_depth=<span class="n">4</span>, min_samples_leaf=<span class="n">5</span>, criterion=<span class="s">"gini"</span>)
+tree.fit(X_tr, y_tr)
+<span class="f">print</span>(tree.feature_importances_)  <span class="c"># важность признаков</span>
+</pre>
+
+  <h4>🔧 Параметры</h4>
+  <dl class="params">
+    <dt>max_depth</dt><dd>Максимальная глубина. Главный регулятор сложности. 3–8 для бустинга, 5–15 для одиночного дерева.</dd>
+    <dt>min_samples_leaf</dt><dd>Минимум объектов в листе. Увеличение → регуляризация.</dd>
+    <dt>min_samples_split</dt><dd>Минимум объектов для попытки сплита.</dd>
+    <dt>criterion</dt><dd><code>"gini"</code> (быстрее) или <code>"entropy"</code>. Результаты почти идентичны.</dd>
+    <dt>max_features</dt><dd>Число признаков для рассмотрения в каждом сплите. <code>"sqrt"</code> для RF.</dd>
+  </dl>
+
+  <div class="warn"><h5>⚠️ Ограничения</h5>
+    <ul><li>Нестабильны: малое изменение данных → совсем другое дерево. Лечится ансамблями.</li>
+    <li>Только оси-параллельные границы → диагональные разделяются ступеньками.</li>
+    <li>Склонны к переобучению без регуляризации.</li>
+    <li>Не экстраполируют за пределы обучающих данных (регрессия).</li></ul>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 08. АНСАМБЛИ -->
+<!-- ============================================================ -->
+<section class="topic" id="t-ens">
+  <h2><span class="num">08</span>Ансамбли: RF · Бустинг · Стекинг</h2>
+  <p>Много слабых моделей вместе бьют одну сильную. Чемпионы табличных данных.</p>
+
+  <div class="cards">
+    <div class="card"><h5>👜 Бэггинг → Random Forest</h5>
+      <div class="formula">$$\mathrm{Var}(\tfrac{1}{B}\sum f_b)=\rho\sigma^2+\frac{1-\rho}{B}\sigma^2$$</div>
+      <p class="mini">Бутстрэп + случайные признаки → декорреляция деревьев → усреднение гасит дисперсию.</p></div>
+    <div class="card"><h5>🚀 Бустинг → Gradient Boosting</h5>
+      <div class="formula">$$F_m=F_{m-1}+\nu\,h_m,\quad h_m\approx(y-F_{m-1})$$</div>
+      <p class="mini">Каждое дерево учит остатки предыдущих. Маленький ν + много деревьев = плавная точная модель.</p></div>
+    <div class="card"><h5>🏆 XGBoost / LightGBM / CatBoost</h5>
+      <p>XGBoost: 2-й порядок Тейлора + регуляризация. LightGBM: гистограммы + leaf-wise. CatBoost: ordered encoding для категорий.</p></div>
+  </div>
+
+  <h3>🎮 Демо: Random Forest + Gradient Boosting</h3>
+  <div class="demo">
+    <h5>Random Forest: число деревьев → гладкость границы</h5>
+    <canvas id="rf_cv" width="800" height="280"></canvas>
+    <div class="drow">
+      <div class="ctl"><label>Деревьев</label><input type="range" id="rf_n" min="1" max="30" step="1" value="10"><output id="rf_n_v"></output></div>
+      <button class="btn" onclick="rfBuild()">Построить лес</button>
+    </div>
+    <div class="stats" id="rf_stats"></div>
+  </div>
+  <div class="demo">
+    <h5>Gradient Boosting: стадии + кривая обучения</h5>
+    <canvas id="bs_cv" width="800" height="280"></canvas>
+    <div class="drow">
+      <div class="ctl"><label>Стадий</label><input type="range" id="bs_m" min="1" max="40" step="1" value="5"><output id="bs_m_v"></output></div>
+      <div class="ctl"><label>ν (LR)</label><input type="range" id="bs_nu" min="0.05" max="1" step="0.05" value="0.3"><output id="bs_nu_v"></output></div>
+    </div>
+    <div class="stats" id="bs_stats"></div>
+  </div>
+
+  <h3>🐍 Python</h3>
+<pre class="code" data-lang="Ensembles">
+<span class="k">from</span> sklearn.ensemble <span class="k">import</span> RandomForestClassifier
+<span class="k">import</span> xgboost <span class="k">as</span> xgb
+<span class="k">import</span> lightgbm <span class="k">as</span> lgb
+<span class="k">from</span> catboost <span class="k">import</span> CatBoostClassifier
+
+rf = RandomForestClassifier(n_estimators=<span class="n">300</span>, max_features=<span class="s">"sqrt"</span>, oob_score=<span class="k">True</span>)
+xg = xgb.XGBClassifier(n_estimators=<span class="n">500</span>, learning_rate=<span class="n">0.05</span>, max_depth=<span class="n">6</span>)
+cb = CatBoostClassifier(iterations=<span class="n">500</span>, cat_features=cat_idx, verbose=<span class="n">0</span>)
+</pre>
+
+  <h4>🔧 Ключевые параметры бустинга</h4>
+  <dl class="params">
+    <dt>n_estimators</dt><dd>Число деревьев. Больше → лучше, но медленнее. Ранняя остановка по eval_set обязательна!</dd>
+    <dt>learning_rate (ν)</dt><dd>Шаг. Меньше → плавнее, нужно больше деревьев. Типично 0.01–0.1.</dd>
+    <dt>max_depth</dt><dd>Глубина деревьев. 3–8 для бустинга. Больше → переобучение.</dd>
+    <dt>subsample / colsample_bytree</dt><dd>Доля объектов/признаков на дерево. Стохастичность = регуляризация.</dd>
+    <dt>reg_lambda / reg_alpha</dt><dd>L2/L1 регуляризация листьев (XGBoost).</dd>
+  </dl>
+
+  <div class="warn"><h5>⚠️ Ограничения</h5>
+    <ul><li>RF: плохо экстраполирует, тяжёл по памяти (хранит все деревья).</li>
+    <li>Бустинг: переобучается при слишком большом числе стадий → early stopping!</li>
+    <li>Бустинг: последовательное обучение → сложно параллелить (кроме LightGBM).</li>
+    <li>Все ансамбли: менее интерпретируемы, чем одно дерево (но есть SHAP).</li></ul>
+  </div>
+
+  <h4>Бэггинг vs Бустинг</h4>
+  <table class="tbl">
+    <tr><th></th><th>RF (Бэггинг)</th><th>Бустинг</th></tr>
+    <tr><td>Обучение</td><td>Параллельно</td><td>Последовательно</td></tr>
+    <tr><td>Лечит</td><td>Дисперсию</td><td>Смещение</td></tr>
+    <tr><td>Деревья</td><td>Глубокие</td><td>Мелкие (3–8)</td></tr>
+    <tr><td>Переобучение</td><td>Почти не бывает</td><td>Риск при большом #стадий</td></tr>
+  </table>
+</section>
+
+<!-- ============================================================ -->
+<!-- 09. КЛАСТЕРИЗАЦИЯ -->
+<!-- ============================================================ -->
+<section class="topic" id="t-clus">
+  <h2><span class="num">09</span>Кластеризация: K-Means · DBSCAN · Иерархическая</h2>
+  <p>Ищем скрытую структуру без ответов: сегменты, аномалии, сжатие.</p>
+
+  <div class="cards">
+    <div class="card"><h5>🎯 K-Means</h5>
+      <div class="formula">$$\min\sum_{c}\sum_{x\in c}\|x-\mu_c\|^2$$</div>
+      <p class="mini">EM-цикл: назначить → пересчитать. K-means++ для инициализации. Строит «круглые» кластеры.</p></div>
+    <div class="card"><h5>🌫️ DBSCAN</h5>
+      <p>Кластер = область плотности. ε-радиус + minPts. Ловит любую форму, находит шум. Не любит переменную плотность.</p></div>
+    <div class="card"><h5>🌲 Иерархическая</h5>
+      <p>Агломеративное слияние. Linkage: single/complete/average/Ward. Дендрограмма → режь на любой высоте. \(O(n^2)\) память.</p></div>
+  </div>
+
+  <h3>🎮 Демо: K-Means + DBSCAN</h3>
+  <div class="demo">
+    <h5>K-Means: шаг за шагом + локоть</h5>
+    <canvas id="km_cv" width="800" height="280"></canvas>
+    <div class="drow">
+      <div class="ctl"><label>k</label><input type="range" id="km_k" min="2" max="7" step="1" value="3"><output id="km_k_v"></output></div>
+      <button class="btn" onclick="kmInit()">Init</button>
+      <button class="btn" onclick="kmStep()">Шаг</button>
+      <button class="btn alt" onclick="kmRun()">До сходимости</button>
+    </div>
+    <div class="stats" id="km_stats"></div>
+  </div>
+  <div class="demo">
+    <h5>DBSCAN: полумесяцы + шум</h5>
+    <canvas id="db_cv" width="800" height="280"></canvas>
+    <div class="drow">
+      <div class="ctl"><label>ε</label><input type="range" id="db_eps" min="0.05" max="0.6" step="0.01" value="0.18"><output id="db_eps_v"></output></div>
+      <div class="ctl"><label>minPts</label><input type="range" id="db_min" min="2" max="10" step="1" value="4"><output id="db_min_v"></output></div>
+    </div>
+    <div class="stats" id="db_stats"></div>
+  </div>
+
+  <h3>🐍 Python</h3>
+<pre class="code" data-lang="sklearn · кластеризация">
+<span class="k">from</span> sklearn.cluster <span class="k">import</span> KMeans, DBSCAN
+<span class="k">from</span> sklearn.metrics <span class="k">import</span> silhouette_score
+
+km = KMeans(n_clusters=<span class="n">5</span>, n_init=<span class="n">10</span>).fit(Xs)
+db = DBSCAN(eps=<span class="n">0.18</span>, min_samples=<span class="n">5</span>).fit(Xs)
+<span class="f">print</span>(silhouette_score(Xs, km.labels_))
+</pre>
+
+  <h4>🔧 Параметры</h4>
+  <dl class="params">
+    <dt>n_clusters (K-Means)</dt><dd>Подбирают по локтю inertia или silhouette score.</dd>
+    <dt>eps (DBSCAN)</dt><dd>Радиус окрестности. Берут из k-distance графика (расстояние до k-го соседа).</dd>
+    <dt>min_samples (DBSCAN)</dt><dd>Минимум соседей для core-точки. Обычно 2×dim.</dd>
+  </dl>
+
+  <div class="warn"><h5>⚠️ Ограничения</h5>
+    <ul><li>K-Means: только выпуклые кластеры, чувствителен к инициализации, требует задания k.</li>
+    <li>DBSCAN: плохо с переменной плотностью, чувствителен к eps, \(O(n^2)\) без индексов.</li>
+    <li>Иерархическая: \(O(n^2)\) память → максимум ~10k точек.</li>
+    <li>Все: нет «правильного» ответа → валидация предметная, не математическая.</li></ul>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 10. PCA / t-SNE / UMAP -->
+<!-- ============================================================ -->
+<section class="topic" id="t-dim">
+  <h2><span class="num">10</span>PCA · t-SNE · UMAP</h2>
+  <p>Сжимаем 1000 признаков в 2–50, сохраняя главное. Визуализация многомерных данных.</p>
+
+  <div class="cards">
+    <div class="card"><h5>📐 PCA</h5>
+      <div class="formula">$$Cv_i=\lambda_i v_i,\quad\text{explained}=\frac{\lambda_i}{\sum\lambda}$$</div>
+      <p class="mini">Линейное сжатие. Собственные векторы ковариационной матрицы = направления макс. дисперсии. Есть transform.</p></div>
+    <div class="card"><h5>🌌 t-SNE</h5>
+      <div class="formula">$$\min KL(P\|Q),\quad q_{ij}\propto(1+\|y_i-y_j\|^2)^{-1}$$</div>
+      <p class="mini">Нелинейная визуализация соседей. Perplexity ≈ эффективное число соседей. НЕ имеет transform. Только для картинок!</p></div>
+    <div class="card"><h5>🕸️ UMAP</h5>
+      <p>kNN-граф + топология. Быстрее t-SNE, сохраняет глобальную структуру, умеет transform. Стандарт выбора для визуализации.</p></div>
+  </div>
+
+  <h3>🎮 Демо: PCA + t-SNE в браузере</h3>
+  <div class="demo">
+    <h5>PCA: стрелки = главные компоненты</h5>
+    <canvas id="pc_cv" width="800" height="280"></canvas>
+    <div class="drow">
+      <div class="ctl"><label>Угол</label><input type="range" id="pc_ang" min="0" max="180" step="1" value="35"><output id="pc_ang_v"></output></div>
+      <div class="ctl"><label>Растяжение</label><input type="range" id="pc_st" min="1" max="4" step="0.1" value="2.4"><output id="pc_st_v"></output></div>
+      <div class="ctl"><label>Проекция</label><input type="checkbox" id="pc_proj" checked></div>
+    </div>
+    <div class="stats" id="pc_stats"></div>
+  </div>
+  <div class="demo">
+    <h5>t-SNE: два кольца, 400 итераций прямо здесь</h5>
+    <canvas id="ts_cv" width="800" height="280"></canvas>
+    <div class="drow">
+      <div class="ctl"><label>Perplexity</label><input type="range" id="ts_perp" min="2" max="25" step="1" value="8"><output id="ts_perp_v"></output></div>
+      <button class="btn" id="ts_btn" onclick="tsRun()">▶ Запустить t-SNE</button>
+    </div>
+    <div class="stats" id="ts_stats"></div>
+  </div>
+
+  <h3>🐍 Python</h3>
+<pre class="code" data-lang="sklearn + umap">
+<span class="k">from</span> sklearn.decomposition <span class="k">import</span> PCA
+<span class="k">from</span> sklearn.manifold <span class="k">import</span> TSNE
+<span class="k">import</span> umap
+
+pca = PCA(n_components=<span class="n">0.95</span>).fit_transform(X_scaled)
+emb = TSNE(perplexity=<span class="n">30</span>, init=<span class="s">"pca"</span>).fit_transform(X_scaled)
+emb2 = umap.UMAP(n_neighbors=<span class="n">15</span>, min_dist=<span class="n">0.1</span>).fit_transform(X_scaled)
+</pre>
+
+  <div class="warn"><h5>⚠️ Ограничения</h5>
+    <ul><li>PCA: только линейные структуры. Для нелинейных → kernel PCA или UMAP.</li>
+    <li>t-SNE: нет transform, стохастичен (разные запуски = разные картинки), искажает глобальную геометрию.</li>
+    <li>UMAP: гиперпараметры n_neighbors/min_dist сильно влияют на результат.</li>
+    <li>ВСЕГДА стандартизируй перед снижением размерности!</li></ul>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 11. APRIORI -->
+<!-- ============================================================ -->
+<section class="topic" id="t-apriori">
+  <h2><span class="num">11</span>Ассоциативные правила · Apriori</h2>
+  <p>«Анализ корзин»: что покупают вместе. Support, Confidence, Lift.</p>
+
+  <div class="cards">
+    <div class="card"><h5>📐 Три метрики</h5>
+      <div class="formula">$$\text{sup}(A)=\frac{\#(A)}{N},\quad\text{conf}(A{\Rightarrow}B)=\frac{\text{sup}(A\cup B)}{\text{sup}(A)},\quad\text{lift}=\frac{\text{conf}}{\text{sup}(B)}$$</div>
+      <p class="mini">Lift &gt; 1 = реальная связь. Lift ≈ 1 = независимы.</p></div>
+    <div class="card"><h5>✂️ Антимонотонность</h5>
+      <p>Подмножество частого набора тоже частое → отсечение на порядки ускоряет перебор.</p></div>
+  </div>
+
+  <h3>🎮 Демо: Редактируй корзины</h3>
+  <div class="demo">
+    <div id="ap_tbl"></div>
+    <div class="drow">
+      <div class="ctl"><label>Min Support</label><input type="range" id="ap_sup" min="0.1" max="0.9" step="0.05" value="0.3"><output id="ap_sup_v"></output></div>
+      <div class="ctl"><label>Min Confidence</label><input type="range" id="ap_conf" min="0.3" max="1" step="0.05" value="0.6"><output id="ap_conf_v"></output></div>
+    </div>
+    <div class="gridcols" style="margin-top:10px">
+      <div><h5>Частые наборы</h5><div id="ap_sets" class="stats" style="flex-direction:column"></div></div>
+      <div><h5>Правила (по lift)</h5><div id="ap_rules" class="stats" style="flex-direction:column"></div></div>
+    </div>
+  </div>
+
+  <div class="warn"><h5>⚠️ Ограничения</h5>
+    <ul><li>Экспоненциальная сложность при большом числе товаров → только для умеренных наборов.</li>
+    <li>Confidence может быть обманчива → всегда смотри lift.</li>
+    <li>Не учитывает временную динамику.</li></ul>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 12. RL -->
+<!-- ============================================================ -->
+<section class="topic" id="t-rl">
+  <h2><span class="num">12</span>Обучение с подкреплением: Q-Learning · DQN · PPO</h2>
+  <p>Нет ответов — есть награда. Агент учится политике через пробу и ошибку.</p>
+
+  <div class="cards">
+    <div class="card"><h5>🔁 Bellman + Q-Learning</h5>
+      <div class="formula">$$Q(s,a)\leftarrow Q(s,a)+\alpha[r+\gamma\max_{a'}Q(s',a')-Q(s,a)]$$</div>
+      <p class="mini">Табличный метод. γ — дисконт, α — скорость, ε — исследование. Off-policy.</p></div>
+    <div class="card"><h5>🎮 DQN</h5>
+      <p>Q-функция ≈ CNN. Replay buffer (убирает корреляции) + Target network (стабильность цели).</p></div>
+    <div class="card"><h5>✂️ PPO (Actor-Critic)</h5>
+      <div class="formula">$$L=\mathbb{E}\big[\min(\tfrac{\pi_\theta}{\pi_{old}}A,\;\mathrm{clip}(\tfrac{\pi_\theta}{\pi_{old}},1\pm\varepsilon)A)\big]$$</div>
+      <p class="mini">Клип защищает от разрушительных обновлений. Стандарт для RLHF и робототехники.</p></div>
+  </div>
+
+  <h3>🎮 Демо: Q-Learning в лабиринте</h3>
+  <div class="demo">
+    <canvas id="rl_cv" width="800" height="300"></canvas>
+    <div class="drow">
+      <div class="ctl"><label>ε</label><input type="range" id="rl_eps" min="0" max="0.5" step="0.01" value="0.15"><output id="rl_eps_v"></output></div>
+      <div class="ctl"><label>α</label><input type="range" id="rl_a" min="0.05" max="0.9" step="0.05" value="0.25"><output id="rl_a_v"></output></div>
+      <div class="ctl"><label>γ</label><input type="range" id="rl_g" min="0.5" max="0.99" step="0.01" value="0.92"><output id="rl_g_v"></output></div>
+      <button class="btn" onclick="rlTrain()">Обучить (800 эп)</button>
+      <button class="btn alt" onclick="rlPlay()">▶ Play Greedy</button>
+      <button class="btn" onclick="rlReset()">Сброс Q</button>
+    </div>
+    <div class="stats" id="rl_stats"></div>
+  </div>
+
+  <h4>🔧 Параметры Q-Learning</h4>
+  <dl class="params">
+    <dt>γ (discount)</dt><dd>0 → живи одним днём. 0.99 → дальновидный стратег.</dd>
+    <dt>α (learning rate)</dt><dd>Скорость обновления Q. Слишком большой → нестабильность.</dd>
+    <dt>ε (exploration)</dt><dd>Доля случайных ходов. Затухает со временем (ε-decay).</dd>
+  </dl>
+
+  <div class="warn"><h5>⚠️ Ограничения</h5>
+    <ul><li>Табличный Q-Learning: только для маленьких пространств состояний.</li>
+    <li>DQN: нестабилен, требует тщательной настройки replay buffer и target network.</li>
+    <li>PPO: чувствителен к нормализации наград и наблюдений.</li>
+    <li>RL в целом: требует миллионов шагов, reward shaping — искусство, воспроизводимость низкая.</li></ul>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 13. DL CORE -->
+<!-- ============================================================ -->
+<section class="topic" id="t-core">
+  <h2><span class="num">13</span>Backpropagation · Оптимизаторы · Активации</h2>
+  <p>Три кита DL: как считать градиенты, как идти, чем изгибать.</p>
+
+  <div class="cards">
+    <div class="card"><h5>⛓️ Chain Rule = Backprop</h5>
+      <div class="formula">$$\frac{\partial L}{\partial w}=\frac{\partial L}{\partial a}\cdot\frac{\partial a}{\partial z}\cdot\frac{\partial z}{\partial w}$$</div>
+      <p class="mini">Прямой ход: значения слева→направо. Обратный: градиенты справа→налево. Сложность ≈ 2× forward.</p></div>
+    <div class="card"><h5>🏃 SGD → Momentum → Adam</h5>
+      <div class="formula">$$\text{Adam: }m=\beta_1 m+(1{-}\beta_1)g,\;v=\beta_2 v+(1{-}\beta_2)g^2$$</div>
+      <p class="mini">Momentum = импульс. Adam = адаптивный шаг на параметр. Дефолт: β₁=0.9, β₂=0.999.</p></div>
+    <div class="card"><h5>🎚️ Активации</h5>
+      <p><b>ReLU</b>: дёшево, но мёртвые нейроны. <b>GELU</b>: трансформеры. <b>Sigmoid/Tanh</b>: гейты. <b>Softmax</b>: классификация.</p></div>
+  </div>
+
+  <h3>🎮 Демо: Backprop + Гонка оптимизаторов</h3>
+  <div class="demo">
+    <h5>Один нейрон: forward → loss → grad → step</h5>
+    <canvas id="bp_cv" width="800" height="240"></canvas>
+    <div class="drow">
+      <div class="ctl"><label>x₁</label><input type="range" id="bp_x1" min="-2" max="2" step="0.1" value="1"><output id="bp_x1_v"></output></div>
+      <div class="ctl"><label>w₁</label><input type="range" id="bp_w1" min="-2" max="2" step="0.05" value="-0.8"><output id="bp_w1_v"></output></div>
+      <div class="ctl"><label>w₂</label><input type="range" id="bp_w2" min="-2" max="2" step="0.05" value="0.6"><output id="bp_w2_v"></output></div>
+      <div class="ctl"><label>b</label><input type="range" id="bp_b" min="-2" max="2" step="0.05" value="0"><output id="bp_b_v"></output></div>
+      <button class="btn" onclick="bpStep()">GD Step</button>
+    </div>
+    <div class="stats" id="bp_stats"></div>
+  </div>
+  <div class="demo">
+    <h5>SGD vs Momentum vs Adam на функции Била</h5>
+    <canvas id="op_cv" width="800" height="300"></canvas>
+    <div class="drow">
+      <div class="ctl"><label>LR</label><input type="range" id="op_lr" min="0.0002" max="0.01" step="0.0002" value="0.002"><output id="op_lr_v"></output></div>
+      <button class="btn" onclick="opRun()">▶ Гонка</button>
+      <button class="btn" onclick="opReset()">Сброс</button>
+    </div>
+    <div class="stats" id="op_stats"></div>
+  </div>
+
+  <h3>🐍 Python</h3>
+<pre class="code" data-lang="PyTorch · цикл обучения">
+model = Net().to(<span class="s">"cuda"</span>)
+crit = nn.CrossEntropyLoss()              <span class="c"># log-softmax ВНУТРИ!</span>
+opt  = torch.optim.AdamW(model.parameters(), lr=<span class="n">3e-4</span>, weight_decay=<span class="n">0.01</span>)
+
+<span class="k">for</span> x, y <span class="k">in</span> loader:
+    opt.zero_grad()
+    loss = crit(model(x), y)              <span class="c"># forward</span>
+    loss.backward()                       <span class="c"># ← весь backprop одной строкой</span>
+    torch.nn.utils.clip_grad_norm_(model.parameters(), <span class="n">1.0</span>)
+    opt.step()
+</pre>
+
+  <div class="warn"><h5>⚠️ Опасности</h5>
+    <ul><li><b>Vanishing gradient:</b> sigmoid/tanh в глубоких сетях → градиенты затухают. Решение: ReLU, residual connections, BatchNorm.</li>
+    <li><b>Exploding gradient:</b> clip_grad_norm_ обязателен для RNN.</li>
+    <li><b>Dead ReLU:</b> нейроны навсегда замолкают. Решение: LeakyReLU, правильная инициализация (He).</li>
+    <li><b>Softmax + CE раздельно:</b> численная нестабильность! Всегда используй nn.CrossEntropyLoss (log-sum-exp trick).</li></ul>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 14. CNN -->
+<!-- ============================================================ -->
+<section class="topic" id="t-cnn">
+  <h2><span class="num">14</span>CNN — Свёрточные сети</h2>
+  <p>Признаки изображений локальны и повторяются. Ядро скользит → карта признаков. Разделение весов = тысячи раз меньше параметров.</p>
+
+  <div class="cards">
+    <div class="card"><h5>🔍 Свёртка</h5>
+      <div class="formula">$$(I*K)[i,j]=\sum_{u,v}K[u,v]\,I[i{+}u,j{+}v]$$</div>
+      <p class="mini">3×3×3 ядро = 27 весов на ВСЁ изображение. Output size: \(W_{out}=(W-K+2P)/S+1\).</p></div>
+    <div class="card"><h5>📏 Pooling + Иерархия</h5>
+      <p>MaxPool 2×2 → сжатие + сдвиг-инвариантность. Слой 1: края → 2-3: текстуры → глубже: части объектов.</p></div>
+  </div>
+
+  <h3>🎮 Демо: Свёртка руками</h3>
+  <div class="demo">
+    <canvas id="cv_cv" width="800" height="300"></canvas>
+    <div class="drow">
+      <div class="ctl"><label>Изображение</label><select id="cv_img"><option value="vert">Вертикальные</option><option value="horz">Горизонтальные</option><option value="face">Смайлик</option></select></div>
+      <div class="ctl"><label>Ядро</label><select id="cv_ker"><option value="sobelx">Sobel X</option><option value="blur">Blur</option><option value="sharpen">Sharpen</option></select></div>
+      <div class="ctl"><label>MaxPool</label><input type="checkbox" id="cv_pool"></div>
+    </div>
+    <div class="stats" id="cv_stats"></div>
+  </div>
+
+  <h3>🐍 Python</h3>
+<pre class="code" data-lang="PyTorch · CNN">
+<span class="k">class</span> <span class="f">CNN</span>(nn.Module):
+    <span class="k">def</span> <span class="f">__init__</span>(self):
+        <span class="f">super</span>().__init__()
+        self.features = nn.Sequential(
+            nn.Conv2d(<span class="n">3</span>, <span class="n">32</span>, <span class="n">3</span>, padding=<span class="n">1</span>), nn.BatchNorm2d(<span class="n">32</span>), nn.ReLU(),
+            nn.MaxPool2d(<span class="n">2</span>),
+            nn.Conv2d(<span class="n">32</span>, <span class="n">64</span>, <span class="n">3</span>, padding=<span class="n">1</span>), nn.ReLU(), nn.AdaptiveAvgPool2d(<span class="n">1</span>))
+        self.head = nn.Sequential(nn.Flatten(), nn.Dropout(<span class="n">0.3</span>), nn.Linear(<span class="n">64</span>, <span class="n">10</span>))
+</pre>
+
+  <div class="warn"><h5>⚠️ Ограничения</h5>
+    <ul><li>Требует много размеченных данных (или transfer learning).</li>
+    <li>Не инвариантна к поворотам (только к сдвигам) → аугментации обязательны.</li>
+    <li>Интерпретируемость низкая → Grad-CAM, saliency maps для понимания.</li>
+    <li>Adversarial attacks: малозаметные возмущения ломают предсказания.</li></ul>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 15. RNN / LSTM -->
+<!-- ============================================================ -->
+<section class="topic" id="t-rnn">
+  <h2><span class="num">15</span>RNN · LSTM · GRU</h2>
+  <p>Сети с памятью: скрытое состояние передаётся от шага к шагу. Текст, звук, временные ряды.</p>
+
+  <div class="cards">
+    <div class="card"><h5>🔁 RNN + Vanishing Gradient</h5>
+      <div class="formula">$$h_t=\tanh(W_{xh}x_t+W_{hh}h_{t-1}+b)$$</div>
+      <p class="mini">Произведение якобианов → затухание/взрыв. Долгие зависимости не выучить.</p></div>
+    <div class="card"><h5>🚪 LSTM</h5>
+      <div class="formula">$$C_t=f_t\odot C_{t-1}+i_t\odot\tanh(\cdot),\quad h_t=o_t\odot\tanh(C_t)$$</div>
+      <p class="mini">Forget/Input/Output gates + аддитивная клеточная память = градиент течёт без затухания.</p></div>
+  </div>
+
+  <h3>🎮 Демо: LSTM Cell Memory</h3>
+  <div class="demo">
+    <canvas id="ls_cv" width="800" height="240"></canvas>
+    <div class="drow">
+      <div class="ctl"><label>Forget f</label><input type="range" id="ls_f" min="0" max="1" step="0.01" value="0.9"><output id="ls_f_v"></output></div>
+      <div class="ctl"><label>Input i</label><input type="range" id="ls_i" min="0" max="1" step="0.01" value="0.2"><output id="ls_i_v"></output></div>
+      <div class="ctl"><label>Output o</label><input type="range" id="ls_o" min="0" max="1" step="0.01" value="0.8"><output id="ls_o_v"></output></div>
+    </div>
+    <div class="stats" id="ls_stats"></div>
+  </div>
+
+  <div class="warn"><h5>⚠️ Ограничения</h5>
+    <ul><li>Последовательная обработка → нельзя параллелить (медленнее трансформеров на GPU).</li>
+    <li>Длинные зависимости всё ещё трудны (>500 шагов) → трансформеры вытеснили RNN в NLP.</li>
+    <li>BPTT: memory растёт линейно с длиной последовательности → truncated BPTT.</li>
+    <li>Временные ряды: часто проигрывают градиентному бустингу на табличных фичах.</li></ul>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 16. ТРАНСФОРМЕРЫ -->
+<!-- ============================================================ -->
+<section class="topic" id="t-trf">
+  <h2><span class="num">16</span>Трансформеры · LLM</h2>
+  <p>«Attention is All You Need». Каждый токен видит все остальные. Параллелизм + дальние зависимости.</p>
+
+  <div class="cards">
+    <div class="card"><h5>🔦 Self-Attention</h5>
+      <div class="formula">$$\mathrm{Attn}(Q,K,V)=\mathrm{softmax}\!\left(\frac{QK^\top}{\sqrt{d_k}}\right)V$$</div>
+      <p class="mini">Query/Key/Value. √d_k предотвращает насыщение softmax. Multi-head = несколько «взглядов».</p></div>
+    <div class="card"><h5>📚 Encoder (BERT) vs Decoder (GPT)</h5>
+      <p>BERT: bidirectional, masked-LM. Понимание. GPT: causal mask, next-token. Генерация. Масштабирование рождает эмерджентные способности.</p></div>
+  </div>
+
+  <h3>🎮 Демо: Attention Heatmap</h3>
+  <div class="demo">
+    <canvas id="at_cv" width="800" height="300"></canvas>
+    <div class="drow">
+      <div class="ctl"><label>Токен</label><input type="range" id="at_sel" min="0" max="6" step="1" value="0"><output id="at_sel_v"></output></div>
+      <div class="ctl"><label>Температура</label><input type="range" id="at_t" min="0.2" max="3" step="0.1" value="1"><output id="at_t_v"></output></div>
+    </div>
+    <div class="stats" id="at_stats"></div>
+  </div>
+
+  <h3>🐍 Python</h3>
+<pre class="code" data-lang="HuggingFace Transformers">
+<span class="k">from</span> transformers <span class="k">import</span> pipeline
+clf = pipeline(<span class="s">"sentiment-analysis"</span>, model=<span class="s">"blanchefort/rubert-base-cased-sentiment"</span>)
+<span class="f">print</span>(clf(<span class="s">"Отличный сервис!"</span>))
+
+<span class="c"># Мини-attention вручную</span>
+<span class="k">import</span> torch.nn.functional <span class="k">as</span> F
+w = F.softmax(Q @ K.T / d**<span class="n">0.5</span>, dim=-<span class="n">1</span>)
+out = w @ V
+</pre>
+
+  <div class="warn"><h5>⚠️ Ограничения</h5>
+    <ul><li>\(O(n^2)\) по длине контекста → FlashAttention, sparse attention для длинных текстов.</li>
+    <li>Галлюцинации: генерирует правдоподобную чушь → RAG, grounding, fact-checking.</li>
+    <li>Стоимость: обучение GPT-3 ≈ $5M, инференс дорогой → дистилляция, квантование.</li>
+    <li>Positional encoding: фиксированный синус → ограниченная длина контекста (RoPE решает).</li>
+    <li>Токенизация: ≈4 символа на токен для русского → контекст расходуется быстрее.</li></ul>
+  </div>
+
+  <div class="case"><h5>💬 Кейс: RAG-ассистент банка</h5>
+    <p>Вопрос → эмбеддинг → поиск топ-5 статей → LLM собирает ответ по документам. 62% обращений без оператора, галлюцинации придушены цитированием.</p>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- PLAYGROUND -->
+<!-- ============================================================ -->
+<section class="topic" id="t-pg">
+  <h2><span class="num">⚡</span>TF.js Playground</h2>
+  <p>Настоящая нейросеть в браузере. Собирай архитектуру, выбирай датасет, обучай.</p>
+  <div class="demo">
+    <div class="gridcols">
+      <canvas id="pg_bound" width="400" height="340"></canvas>
+      <canvas id="pg_charts" width="400" height="340"></canvas>
+    </div>
+    <div class="drow">
+      <div class="ctl"><label>Данные</label><select id="pg_data"><option value="circles">Круги</option><option value="moons">Луны</option><option value="spiral">Спираль</option></select></div>
+      <div class="ctl"><label>Слоёв</label><input type="range" id="pg_l" min="1" max="4" step="1" value="2"><output id="pg_l_v"></output></div>
+      <div class="ctl"><label>Нейронов</label><input type="range" id="pg_w" min="2" max="16" step="1" value="8"><output id="pg_w_v"></output></div>
+      <button class="btn" id="pg_btn" onclick="pgTrain()">▶ Обучить</button>
+    </div>
+    <div class="stats" id="pg_stats"></div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- CSV LAB -->
+<!-- ============================================================ -->
+<section class="topic" id="t-csv">
+  <h2><span class="num">📂</span>CSV Лаборатория</h2>
+  <p>Загрузи свой CSV или сгенерируй демо. Регрессия и кластеризация прямо в браузере.</p>
+  <div class="demo">
+    <div class="drow">
+      <input type="file" id="csv_file" accept=".csv">
+      <button class="btn alt" onclick="csvGen('housing')">🏠 Квартиры</button>
+      <button class="btn alt" onclick="csvGen('flowers')">🌸 Цветы</button>
+    </div>
+    <div id="csv_info" class="stats" style="margin:10px 0"></div>
+    <div style="overflow-x:auto"><table class="tbl" id="csv_preview"></table></div>
+    <div class="gridcols" style="margin-top:16px">
+      <div class="card">
+        <h5>Регрессия (OLS)</h5>
+        <div class="ctl"><label>Цель</label><select id="csv_target"></select></div>
+        <button class="btn" onclick="csvRegress()" style="margin-top:8px">Посчитать</button>
+        <div id="csv_regout" class="mini" style="margin-top:8px"></div>
+      </div>
+      <div class="card">
+        <h5>K-Means</h5>
+        <div class="drow">
+          <div class="ctl"><label>X</label><select id="csv_kx"></select></div>
+          <div class="ctl"><label>Y</label><select id="csv_ky"></select></div>
+          <div class="ctl"><label>k</label><input type="range" id="csv_kk" min="2" max="8" step="1" value="3"><output id="csv_kk_v"></output></div>
+        </div>
+        <button class="btn" onclick="csvCluster()" style="margin-top:8px">Кластеризовать</button>
+        <canvas id="csv_kcv" width="400" height="250" style="margin-top:8px"></canvas>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- EXAM (RU) -->
+<!-- ============================================================ -->
+<section class="topic" id="t-exam">
+  <h2><span class="num">🧪</span>Экзамен</h2>
+  <p>48 вопросов на русском с объяснениями. Фильтр по темам.</p>
+  <div class="demo">
+    <div id="ex_topics" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px"></div>
+    <div class="drow">
+      <select id="ex_n"><option>10</option><option selected>20</option><option>48</option></select>
+      <button class="btn alt" onclick="exStart()">🚀 Начать квиз</button>
+    </div>
+  </div>
+  <div id="ex_area"></div>
+</section>
+
+</main>
+</div>
+
+<script>
+/* ================= UTILS ================= */
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const fmt=(x,d=3)=>(+x).toFixed(d);
+const rnd=(a,b)=>a+Math.random()*(b-a);
+const gauss=()=>{let u=0,v=0;while(!u)u=Math.random();while(!v)v=Math.random();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v)};
+function bind(id,cb){const el=$('#'+id),out=$('#'+id+'_v');if(!el)return;const f=()=>{if(out)out.textContent=el.value;cb&&cb(+el.value)};el.addEventListener('input',f);f()}
+function ctx(id){const c=$('#'+id);if(!c){console.warn('Canvas missing:',id);return null}return c.getContext('2d')}
+function dot(g,x,y,r,col){g.beginPath();g.arc(x,y,r,0,7);g.fillStyle=col;g.fill()}
+function lin(g,x1,y1,x2,y2,col,w=1,dash){g.save();g.strokeStyle=col;g.lineWidth=w;if(dash)g.setLineDash(dash);g.beginPath();g.moveTo(x1,y1);g.lineTo(x2,y2);g.stroke();g.restore()}
+function txt(g,t,x,y,col='#8ba1b6',size=11,align='left'){g.fillStyle=col;g.font=size+'px JetBrains Mono,monospace';g.textAlign=align;g.fillText(t,x,y)}
+const PAL=['#2dd4bf','#f5b942','#60a5fa','#f472b6','#a3e635','#fb923c','#c084fc'];
+function gaussSolve(A,b){const n=b.length;A=A.map(r=>r.slice());b=b.slice();for(let i=0;i<n;i++){let p=i;for(let r=i+1;r<n;r++)if(Math.abs(A[r][i])>Math.abs(A[p][i]))p=r;[A[i],A[p]]=[A[p],A[i]];[b[i],b[p]]=[b[p],b[i]];for(let r=i+1;r<n;r++){const f=A[r][i]/A[i][i];for(let c=i;c<n;c++)A[r][c]-=f*A[i][c];b[r]-=f*b[i]}}const x=new Array(n);for(let i=n-1;i>=0;i--){let s=b[i];for(let c=i+1;c<n;c++)s-=A[i][c]*x[c];x[i]=s/A[i][i]}return x}
+
+/* ================= COPY BUTTON LOGIC ================= */
+const ICON_COPY = '<svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+const ICON_CHECK = '<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>';
+
+function addCopyButtons(){
+  $$('pre.code').forEach(pre => {
+    // Avoid adding twice
+    if(pre.querySelector('.copy-btn')) return;
+    
+    const btn = document.createElement('button');
+    btn.className = 'copy-btn';
+    btn.innerHTML = ICON_COPY;
+    btn.title = 'Копировать код';
+    btn.setAttribute('aria-label', 'Копировать код');
+    
+    btn.addEventListener('click', () => {
+      // Get clean text without HTML tags
+      const code = pre.textContent || pre.innerText;
+      navigator.clipboard.writeText(code).then(() => {
+        btn.innerHTML = ICON_CHECK;
+        btn.classList.add('copied');
+        setTimeout(() => {
+          btn.innerHTML = ICON_COPY;
+          btn.classList.remove('copied');
+        }, 2000);
+      }).catch(err => {
+        console.error('Copy failed:', err);
+      });
+    });
+    
+    pre.appendChild(btn);
+  });
+}
+
+/* ================= 01 LINREG ================= */
+let lrD={w:0,b:0,hist:[],data:[]};
+function lrGen(){const s=+$('#lr_noise').value;lrD.data=[];for(let i=0;i<40;i++){const x=rnd(-3,3);lrD.data.push([x,2.3*x+1+gauss()*s])}}
+function lrDraw(){try{const g=ctx('lr_cv');if(!g)return;const W=800,H=280;g.clearRect(0,0,W,H);const X=v=>120+v*90,Y=v=>240-v*40;lin(g,30,Y(0),W-20,Y(0),'#1e2c3d');lin(g,X(0),20,X(0),260,'#1e2c3d');for(const[x,y]of lrD.data)dot(g,X(x),Y(y),3,'rgba(96,165,250,.8)');lin(g,X(-3.3),Y(lrD.w*-3.3+lrD.b),X(3.3),Y(lrD.w*3.3+lrD.b),'#2dd4bf',2.5);const loss=lrD.data.reduce((s,[x,y])=>s+(y-(lrD.w*x+lrD.b))**2,0)/lrD.data.length;$('#lr_stats').innerHTML=`<div class="stat">w=<b>${fmt(lrD.w)}</b> (истина 2.3)</div><div class="stat">b=<b>${fmt(lrD.b)}</b></div><div class="stat">MSE=<b>${fmt(loss)}</b></div>`}catch(e){console.error(e)}}
+function lrStep(){const n=lrD.data.length;let dw=0,db=0;for(const[x,y]of lrD.data){const e=y-(lrD.w*x+lrD.b);dw+=-2*x*e/n;db+=-2*e/n}const lr=+$('#lr_lr').value;lrD.w-=lr*dw;lrD.b-=lr*db;lrDraw()}
+function lrOLS(){const n=lrD.data.length;let sx=0,sy=0,sxy=0,sxx=0;for(const[x,y]of lrD.data){sx+=x;sy+=y;sxy+=x*y;sxx+=x*x}lrD.w=(n*sxy-sx*sy)/(n*sxx-sx*sx);lrD.b=(sy-lrD.w*sx)/n;lrDraw()}
+function lrReset(){lrD.w=0;lrD.b=0;lrD.hist=[];lrDraw()}
+bind('lr_noise',()=>{lrGen();lrDraw()});bind('lr_lr');
+
+const rgX=[],rgY=[];(function(){for(let i=0;i<80;i++){const a=rnd(-2,2),b=rnd(-2,2);rgX.push([a,b]);rgY.push(1.6*a-1.9*b+gauss()*0.4)}})();
+function rgLoss(w1,w2){let s=0;for(let i=0;i<rgX.length;i++){const e=rgY[i]-(w1*rgX[i][0]+w2*rgX[i][1]);s+=e*e}return s/rgX.length}
+function rgDraw(){try{const g=ctx('rg_cv');if(!g)return;const W=800,H=300;g.clearRect(0,0,W,H);const cx=400,cy=150,sc=55,type=$('#rg_type').value,lam=+$('#rg_lam').value;const img=g.createImageData(W,H);for(let py=0;py<H;py+=2)for(let px=0;px<W;px+=2){const w1=(px-cx)/sc,w2=(cy-py)/sc;let v=Math.log(1+rgLoss(w1,w2))/6;if(v>1)v=1;const idx=(py*W+px)*4;img.data[idx]=30+v*140;img.data[idx+1]=40;img.data[idx+2]=70+(1-v)*80;img.data[idx+3]=255;for(let dy=0;dy<2;dy++)for(let dx=0;dx<2;dx++){const i2=((py+dy)*W+px+dx)*4;img.data[i2]=img.data[idx];img.data[i2+1]=img.data[idx+1];img.data[i2+2]=img.data[idx+2];img.data[i2+3]=255}}g.putImageData(img,0,0);let oW=[0,0],oL=1e9;for(let w1=-4;w1<=4;w1+=.05)for(let w2=-4;w2<=4;w2+=.05){const l=rgLoss(w1,w2);if(l<oL){oL=l;oW=[w1,w2]}}dot(g,cx+oW[0]*sc,cy-oW[1]*sc,5,'#f5b942');const rad=(1.05-lam)*3+0.3;g.strokeStyle='rgba(163,230,53,.9)';g.lineWidth=2;g.beginPath();if(type==='l2')g.arc(cx,cy,rad*sc*0.8,0,7);else{g.moveTo(cx,cy-rad*sc*0.8);g.lineTo(cx+rad*sc*0.8,cy);g.lineTo(cx,cy+rad*sc*0.8);g.lineTo(cx-rad*sc*0.8,cy);g.closePath()}g.stroke();let bW=[0,0],bL=1e9;for(let w1=-4;w1<=4;w1+=.04)for(let w2=-4;w2<=4;w2+=.04){const inside=type==='l2'?Math.hypot(w1,w2)<=rad*0.8:Math.abs(w1)+Math.abs(w2)<=rad*0.8;if(!inside)continue;const l=rgLoss(w1,w2);if(l<bL){bL=l;bW=[w1,w2]}}dot(g,cx+bW[0]*sc,cy-bW[1]*sc,5,'#a3e635');$('#rg_stats').innerHTML=`<div class="stat">OLS: [${fmt(oW[0],2)}, ${fmt(oW[1],2)}]</div><div class="stat">${type.toUpperCase()}: [<b>${fmt(bW[0],2)}, ${fmt(bW[1],2)}</b>]</div>`}catch(e){console.error(e)}}
+$('#rg_type').addEventListener('change',rgDraw);bind('rg_lam',rgDraw);
+
+/* ================= 02 POLY ================= */
+let plD={tr:[],te:[]};
+function plGen(){plD.tr=[];plD.te=[];for(let i=0;i<16;i++){const x=rnd(-3,3);plD.tr.push([x,Math.sin(x)*1.6+x*0.3+gauss()*0.25])}for(let i=0;i<16;i++){const x=rnd(-3,3);plD.te.push([x,Math.sin(x)*1.6+x*0.3+gauss()*0.25])}}
+function polyFit(pts,d){const n=pts.length,m=d+1;const phi=x=>{let r=[1],v=1;for(let i=0;i<d;i++){v*=x;r.push(v)}return r};const A=Array.from({length:m},()=>new Array(m).fill(0)),b=new Array(m).fill(0);for(const[x,y]of pts){const p=phi(x/3);for(let i=0;i<m;i++){b[i]+=p[i]*y;for(let j=0;j<m;j++)A[i][j]+=p[i]*p[j]}}return gaussSolve(A,b)}
+const polyEval=(c,x)=>{let s=0,v=1,xs=x/3;for(let i=0;i<c.length;i++){s+=c[i]*v;v*=xs}return s};
+function plDraw(){try{const g=ctx('pl_cv');if(!g)return;const W=800,H=280;g.clearRect(0,0,W,H);const X=v=>60+(v+3)/6*450,Y=v=>260-v*40;lin(g,30,Y(0),520,Y(0),'#1e2c3d');const d=+$('#pl_deg').value,c=polyFit(plD.tr,d);g.beginPath();for(let x=-3;x<=3;x+=.05){const y=polyEval(c,x);x===-3?g.moveTo(X(x),Y(y)):g.lineTo(X(x),Y(y))}g.strokeStyle='#60a5fa';g.lineWidth=2;g.stroke();for(const[x,y]of plD.tr)dot(g,X(x),Y(y),3,'#fff');const mse=pts=>pts.reduce((s,[x,y])=>s+(y-polyEval(c,x))**2,0)/pts.length;$('#pl_stats').innerHTML=`<div class="stat">Степень=<b>${d}</b></div><div class="stat">Train MSE=<b>${fmt(mse(plD.tr))}</b></div><div class="stat">Test MSE=<b>${fmt(mse(plD.te))}</b></div>`}catch(e){console.error(e)}}
+function plRegen(){plGen();plDraw()}bind('pl_deg',plDraw);
+
+/* ================= 03 LOGREG ================= */
+let lgD={pts:[]};
+function lgGen(){lgD.pts=[];for(let i=0;i<40;i++){lgD.pts.push([gauss()*0.7-1,gauss()*0.7+0.8,0]);lgD.pts.push([gauss()*0.7+1,gauss()*0.7-0.8,1])}}
+const sig=z=>1/(1+Math.exp(-z));
+function lgDraw(){try{const g=ctx('lg_cv');if(!g)return;const W=800,H=300;g.clearRect(0,0,W,H);const w1=+$('#lg_w1').value,w2=+$('#lg_w2').value,b=+$('#lg_b').value;const X=v=>(v+3.2)/6.4*520,Y=v=>280-(v+3.2)/6.4*260;for(let py=0;py<H;py+=8)for(let px=0;px<520;px+=8){const x=px/520*6.4-3.2,y=(280-py)/260*6.4-3.2;const p=sig(w1*x+w2*y+b);g.fillStyle=p>0.5?`rgba(45,212,191,${(p-.5)*0.5})`:`rgba(244,114,182,${(.5-p)*0.5})`;g.fillRect(px,py,8,8)}if(Math.abs(w2)>1e-3)lin(g,X(-3.2),Y(-(-b-w1*-3.2)/w2),X(3.2),Y(-(-b-w1*3.2)/w2),'#f5b942',2);for(const[x,y,l]of lgD.pts)dot(g,X(x),Y(y),4,l?'#2dd4bf':'#f472b6');let acc=0;for(const[x,y,l]of lgD.pts)if((sig(w1*x+w2*y+b)>0.5?1:0)===l)acc++;$('#lg_stats').innerHTML=`<div class="stat">Acc=<b>${fmt(acc/lgD.pts.length*100,1)}%</b></div>`}catch(e){console.error(e)}}
+$('#lg_cv').addEventListener('click',e=>{const r=e.target.getBoundingClientRect();const x=(e.clientX-r.left)/r.width*6.4-3.2,y=(1-(e.clientY-r.top)/r.height)*6.4-3.2;lgD.pts.push([x,y,e.shiftKey?0:1]);lgDraw()});
+function lgTrain(){let w1=+$('#lg_w1').value,w2=+$('#lg_w2').value,b=+$('#lg_b').value;for(let ep=0;ep<100;ep++){let g1=0,g2=0,gb=0;for(const[x,y,l]of lgD.pts){const p=sig(w1*x+w2*y+b)-l;g1+=p*x;g2+=p*y;gb+=p}const n=lgD.pts.length;w1-=0.3*g1/n;w2-=0.3*g2/n;b-=0.3*gb/n}$('#lg_w1').value=w1;$('#lg_w2').value=w2;$('#lg_b').value=b;lgDraw()}
+function lgReset(){lgGen();$('#lg_w1').value=1;$('#lg_w2').value=1;$('#lg_b').value=0;lgDraw()}
+bind('lg_w1',lgDraw);bind('lg_w2',lgDraw);bind('lg_b',lgDraw);
+
+/* ================= 04 SVM ================= */
+let svD={pts:[],w:[1,1],b:0};
+function svData(){svD.pts=[];for(let i=0;i<30;i++){svD.pts.push([gauss()*0.6-1.1,gauss()*0.6+0.9,0]);svD.pts.push([gauss()*0.6+1.1,gauss()*0.6-0.9,1])}}
+function svTrain(){const C=Math.pow(10,+$('#sv_c').value);let w=[0.3,0.3],b=0;for(let ep=0;ep<800;ep++){let g1=0,g2=0,gb=0;for(const[x,y,l]of svD.pts){const t=l*2-1,m=t*(w[0]*x+w[1]*y+b);if(m<1){g1+=-t*x*C;g2+=-t*y*C;gb+=-t*C}}g1+=w[0];g2+=w[1];w[0]-=0.02*g1/30;w[1]-=0.02*g2/30;b-=0.02*gb/30}svD.w=w;svD.b=b;svDraw()}
+function svDraw(){try{const g=ctx('sv_cv');if(!g)return;const W=800,H=300;g.clearRect(0,0,W,H);const X=v=>(v+3.2)/6.4*W,Y=v=>280-(v+3.2)/6.4*260;const[w1,w2]=svD.w,b=svD.b,nm=Math.hypot(w1,w2)||1e-9;const lineAt=(c,col,dash)=>{if(Math.abs(w2)<1e-4)return;lin(g,X(-3.2),Y((c-w1*-3.2-b)/w2),X(3.2),Y((c-w1*3.2-b)/w2),col,2,dash)};lineAt(0,'#a78bfa');lineAt(1,'rgba(167,139,250,.5)',[6,5]);lineAt(-1,'rgba(167,139,250,.5)',[6,5]);for(const[x,y,l]of svD.pts)dot(g,X(x),Y(y),4,l?'#2dd4bf':'#f472b6');$('#sv_stats').innerHTML=`<div class="stat">Margin=<b>${fmt(2/nm)}</b></div><div class="stat">C=<b>${fmt(Math.pow(10,+$('#sv_c').value))}</b></div>`}catch(e){console.error(e)}}
+bind('sv_c',()=>svTrain());
+
+/* ================= 05 BAYES ================= */
+const nbMuB=[1,-0.7];
+function nbDraw(){try{const g=ctx('nb_cv');if(!g)return;const W=800,H=300;g.clearRect(0,0,W,H);const muA=[+$('#nb_m1').value,0.8],sA=+$('#nb_s1').value,sB=0.5,pA=+$('#nb_pa').value;const X=v=>(v+3.2)/6.4*W,Y=v=>280-(v+3.2)/6.4*260;for(let py=0;py<H;py+=10)for(let px=0;px<W;px+=10){const x=px/W*6.4-3.2,y=(280-py)/260*6.4-3.2;const lA=Math.log(pA)-((x-muA[0])**2+(y-muA[1])**2)/(2*sA*sA);const lB=Math.log(1-pA)-((x-nbMuB[0])**2+(y-nbMuB[1])**2)/(2*sB*sB);const p=sig(lA-lB);g.fillStyle=p>0.5?`rgba(244,114,182,${(p-.5)*0.7})`:`rgba(96,165,250,${(.5-p)*0.7})`;g.fillRect(px,py,10,10)}dot(g,X(muA[0]),Y(muA[1]),5,'#f472b6');dot(g,X(nbMuB[0]),Y(nbMuB[1]),5,'#60a5fa');$('#nb_stats').innerHTML=`<div class="stat">Кликни → P(A|x)</div>`}catch(e){console.error(e)}}
+$('#nb_cv').addEventListener('click',e=>{const r=e.target.getBoundingClientRect();const x=(e.clientX-r.left)/r.width*6.4-3.2,y=(1-(e.clientY-r.top)/r.height)*6.4-3.2;const muA=[+$('#nb_m1').value,0.8],sA=+$('#nb_s1').value,sB=0.5,pA=+$('#nb_pa').value;const lA=Math.log(pA)-((x-muA[0])**2+(y-muA[1])**2)/(2*sA*sA);const lB=Math.log(1-pA)-((x-nbMuB[0])**2+(y-nbMuB[1])**2)/(2*sB*sB);const p=sig(lA-lB);$('#nb_stats').innerHTML=`<div class="stat">P(A|x)=<b>${fmt(p*100,1)}%</b></div>`});
+['nb_m1','nb_s1','nb_pa'].forEach(i=>bind(i,nbDraw));
+
+/* ================= 06 KNN ================= */
+let knD={pts:[],queries:[]};
+function knGen(){knD.pts=[];for(let i=0;i<60;i++){const a=Math.random()<0.5;knD.pts.push([gauss()*0.7+(a?-1.2:1.2),gauss()*0.7+(a?0.9:-0.9),a?0:1])}}
+function knPredict(q,k){const d=knD.pts.map(pt=>[Math.hypot(q[0]-pt[0],q[1]-pt[1]),pt[2]]).sort((a,b)=>a[0]-b[0]).slice(0,k);return d.filter(x=>x[1]===1).length>k/2}
+function knDraw(){try{const g=ctx('kn_cv');if(!g)return;const W=800,H=300;g.clearRect(0,0,W,H);const X=v=>(v+3.4)/6.8*W,Y=v=>280-(v+3.4)/6.8*260;for(const[x,y,l]of knD.pts)dot(g,X(x),Y(y),4,l?'#2dd4bf':'#fbbf24');for(const q of knD.queries){const cls=knPredict(q,+$('#kn_k').value);dot(g,X(q[0]),Y(q[1]),6,cls?'#2dd4bf':'#fbbf24');g.strokeStyle='#fff';g.lineWidth=2;g.beginPath();g.arc(X(q[0]),Y(q[1]),6,0,7);g.stroke()}$('#kn_stats').innerHTML=`<div class="stat">Запросов: ${knD.queries.length}</div>`}catch(e){console.error(e)}}
+$('#kn_cv').addEventListener('click',e=>{const r=e.target.getBoundingClientRect();knD.queries.push([(e.clientX-r.left)/r.width*6.8-3.4,(1-(e.clientY-r.top)/r.height)*6.8-3.4]);if(knD.queries.length>5)knD.queries.shift();knDraw()});
+function knRegions(){knDraw()}function knClear(){knD.queries=[];knDraw()}
+bind('kn_k',knDraw);
+
+/* ================= 07 TREE ================= */
+let trD={pts:[]};
+function trData(){trD.pts=[];for(let i=0;i<120;i++){const x=rnd(-2,2),y=rnd(-2,2);let l=(x>0)===(y>0)?1:0;if(Math.random()<0.13)l=1-l;trD.pts.push([x,y,l])}}
+function gini(idx){if(!idx.length)return 0;let c=0;for(const i of idx)if(trD.pts[i][2])c++;const p=c/idx.length;return 1-p*p-(1-p)**2}
+function buildTree(idx,depth){const c1=idx.filter(i=>trD.pts[i][2]).length;if(depth===0||idx.length<4||c1===0||c1===idx.length)return{leaf:true,p:c1/idx.length};let best=null;for(let f=0;f<2;f++){const vals=[...new Set(idx.map(i=>trD.pts[i][f]))].sort((a,b)=>a-b);for(let t=0;t<vals.length-1;t+=Math.max(1,Math.floor(vals.length/10))){const th=(vals[t]+vals[t+1])/2;const L=idx.filter(i=>trD.pts[i][f]<=th),R=idx.filter(i=>trD.pts[i][f]>th);if(!L.length||!R.length)continue;const gain=gini(idx)-L.length/idx.length*gini(L)-R.length/idx.length*gini(R);if(!best||gain>best.gain)best={gain,f,th,L,R}}}if(!best)return{leaf:true,p:c1/idx.length};return{f:best.f,th:best.th,left:buildTree(best.L,depth-1),right:buildTree(best.R,depth-1)}}
+function treePred(t,p){while(!t.leaf)t=p[t.f]<=t.th?t.left:t.right;return t.p}
+function trDraw(){try{const g=ctx('tr_cv');if(!g)return;const W=800,H=300;g.clearRect(0,0,W,H);const X=v=>(v+2.1)/4.2*W,Y=v=>280-(v+2.1)/4.2*260;const d=+$('#tr_d').value;const tree=buildTree(trD.pts.map((_,i)=>i),d);for(let py=0;py<H;py+=6)for(let px=0;px<W;px+=6){const x=px/W*4.2-2.1,y=(280-py)/260*4.2-2.1;const p=treePred(tree,[x,y]);g.fillStyle=p>0.5?`rgba(74,222,128,${0.1+p*0.4})`:`rgba(248,113,113,${0.1+(1-p)*0.4})`;g.fillRect(px,py,6,6)}for(const[x,y,l]of trD.pts)dot(g,X(x),Y(y),3,l?'#4ade80':'#f87171');$('#tr_stats').innerHTML=`<div class="stat">Глубина=<b>${d}</b></div>`}catch(e){console.error(e)}}
+bind('tr_d',trDraw);
+
+/* ================= 08 ENSEMBLES ================= */
+let rfD={pts:[],forest:[]};
+function rfData(){rfD.pts=[];for(let i=0;i<120;i++){const x=rnd(-2,2),y=rnd(-2,2);let l=Math.hypot(x-0.5,y+0.5)<1.1?1:0;if(Math.random()<0.12)l=1-l;rfD.pts.push([x,y,l])}}
+function rfTree(idx,depth){const c1=idx.filter(i=>rfD.pts[i][2]).length;if(depth===0||idx.length<4||c1===0||c1===idx.length)return{leaf:true,p:c1/idx.length};let best=null;for(let f=0;f<2;f++){const vals=idx.map(i=>rfD.pts[i][f]).sort((a,b)=>a-b);for(let t=0;t<5;t++){const th=rnd(vals[0],vals[vals.length-1]);const L=idx.filter(i=>rfD.pts[i][f]<=th),R=idx.filter(i=>rfD.pts[i][f]>th);if(!L.length||!R.length)continue;let cL=0;for(const i of L)if(rfD.pts[i][2])cL++;const pL=cL/L.length;const gL=1-pL*pL-(1-pL)**2;let cR=0;for(const i of R)if(rfD.pts[i][2])cR++;const pR=cR/R.length;const gR=1-pR*pR-(1-pR)**2;const gain=(1-gini(idx))-L.length/idx.length*gL-R.length/idx.length*gR;if(!best||gain>best.gain)best={gain,f,th,L,R}}}if(!best)return{leaf:true,p:c1/idx.length};return{f:best.f,th:best.th,left:rfTree(best.L,depth-1),right:rfTree(best.R,depth-1)}}
+function rfPred(t,p){while(!t.leaf)t=p[t.f]<=t.th?t.left:t.right;return t.p}
+function rfBuild(){const nT=+$('#rf_n').value;rfD.forest=[];for(let t=0;t<nT;t++){const boot=[];for(let i=0;i<rfD.pts.length;i++)boot.push(Math.floor(Math.random()*rfD.pts.length));rfD.forest.push(rfTree(boot,5))}rfDraw()}
+function rfDraw(){try{const g=ctx('rf_cv');if(!g)return;const W=800,H=280;g.clearRect(0,0,W,H);const X=v=>(v+2.1)/4.2*W,Y=v=>260-(v+2.1)/4.2*240;if(!rfD.forest.length)return;for(let py=0;py<H;py+=7)for(let px=0;px<W;px+=7){const x=px/W*4.2-2.1,y=(260-py)/240*4.2-2.1;let p=0;for(const t of rfD.forest)p+=rfPred(t,[x,y]);p/=rfD.forest.length;g.fillStyle=p>0.5?`rgba(251,146,60,${(p-.5)*1.2})`:`rgba(96,165,250,${(.5-p)*1.2})`;g.fillRect(px,py,7,7)}for(const[x,y,l]of rfD.pts)dot(g,X(x),Y(y),3,l?'#fb923c':'#60a5fa');$('#rf_stats').innerHTML=`<div class="stat">Деревьев=<b>${rfD.forest.length}</b></div>`}catch(e){console.error(e)}}
+bind('rf_n');
+
+let bsD={X:[],y:[],stages:[]};
+function bsGen(){bsD.X=[];bsD.y=[];for(let i=0;i<60;i++){const x=rnd(-3,3);bsD.X.push(x);bsD.y.push(Math.sin(x)*1.5+0.3*x+gauss()*0.35)}}
+function fitStump(X,r){const order=X.map((x,i)=>i).sort((a,b)=>X[a]-X[b]);let bl=null;for(let t=1;t<order.length;t+=Math.max(1,Math.floor(order.length/10))){const th=(X[order[t-1]]+X[order[t]])/2;const L=order.slice(0,t),R=order.slice(t);const mL=L.reduce((s,i)=>s+r[i],0)/L.length,mR=R.reduce((s,i)=>s+r[i],0)/R.length;let loss=0;for(const i of L)loss+=(r[i]-mL)**2;for(const i of R)loss+=(r[i]-mR)**2;if(!bl||loss<bl.loss)bl={loss,th,mL,mR}}return bl}
+function stumpPred(m,x){return x<=m.th?m.mL:m.mR}
+function bsCompute(){const nu=+$('#bs_nu').value;bsD.stages=[];let F=bsD.X.map(()=>0);for(let m=0;m<40;m++){const r=bsD.y.map((y,i)=>y-F[i]);const model=fitStump(bsD.X,r);F=F.map((f,i)=>f+nu*stumpPred(model,bsD.X[i]));bsD.stages.push({model,F:F.slice(),mse:bsD.y.reduce((s,y,i)=>s+(y-F[i])**2,0)/bsD.y.length})}}
+function bsDraw(){try{const g=ctx('bs_cv');if(!g)return;const W=800,H=280;g.clearRect(0,0,W,H);const X=v=>30+(v+3.2)/6.4*740,Y=v=>200-v*35;lin(g,20,Y(0),W-20,Y(0),'#1e2c3d');const m=+$('#bs_m').value,st=bsD.stages[m-1];if(!st)return;for(let i=0;i<bsD.X.length;i++){dot(g,X(bsD.X[i]),Y(bsD.y[i]),3,'#60a5fa');dot(g,X(bsD.X[i]),Y(bsD.y[i]-st.F[i]+bsD.y[i]),2,'rgba(248,113,113,.8)')}g.beginPath();for(let x=-3.2;x<=3.2;x+=.04){let s=0;for(let i=0;i<m;i++)s+=+$('#bs_nu').value*stumpPred(bsD.stages[i].model,x);x===-3.2?g.moveTo(X(x),Y(s)):g.lineTo(X(x),Y(s))}g.strokeStyle='#a3e635';g.lineWidth=2;g.stroke();$('#bs_stats').innerHTML=`<div class="stat">Стадий=<b>${m}</b></div><div class="stat">MSE=<b>${fmt(st.mse)}</b></div>`}catch(e){console.error(e)}}
+$('#bs_nu').addEventListener('input',()=>{bsCompute();bsDraw()});bind('bs_m',bsDraw);
+
+/* ================= 09 CLUSTERING ================= */
+let kmD={pts:[],cents:[],labels:[]};
+function kmData(){kmD.pts=[];const cs=[[-1.6,1],[-1.2,-1.3],[1.5,0.8]];for(const[cx,cy]of cs)for(let i=0;i<40;i++)kmD.pts.push([cx+gauss()*0.5,cy+gauss()*0.5])}
+function kmInit(){const k=+$('#km_k').value;kmD.cents=[];for(let i=0;i<k;i++)kmD.cents.push([...kmD.pts[Math.floor(Math.random()*kmD.pts.length)]]);kmAssign();kmDraw()}
+function kmAssign(){kmD.labels=kmD.pts.map(p=>{let bi=0,bd=1e9;kmD.cents.forEach((c,i)=>{const d=(c[0]-p[0])**2+(c[1]-p[1])**2;if(d<bd){bd=d;bi=i}});return bi})}
+function kmStep(){if(!kmD.cents.length)return kmInit();kmAssign();kmD.cents=kmD.cents.map((c,i)=>{const grp=kmD.pts.filter((_,j)=>kmD.labels[j]===i);if(!grp.length)return c;return[grp.reduce((s,p)=>s+p[0],0)/grp.length,grp.reduce((s,p)=>s+p[1],0)/grp.length]});kmDraw()}
+function kmRun(){for(let i=0;i<30;i++){const before=JSON.stringify(kmD.cents);kmStep();if(JSON.stringify(kmD.cents)===before)break}}
+function kmDraw(){try{const g=ctx('km_cv');if(!g)return;const W=800,H=280;g.clearRect(0,0,W,H);const X=v=>(v+3)/6*520,Y=v=>260-(v+2.7)/5.4*240;kmD.pts.forEach((p,i)=>dot(g,X(p[0]),Y(p[1]),3,kmD.cents.length?PAL[kmD.labels[i]]:'#5c7186'));kmD.cents.forEach((c,i)=>{lin(g,X(c[0])-8,Y(c[1]),X(c[0])+8,Y(c[1]),PAL[i],3);lin(g,X(c[0]),Y(c[1])-8,X(c[0]),Y(c[1])+8,PAL[i],3)});$('#km_stats').innerHTML=`<div class="stat">k=<b>${+$('#km_k').value}</b></div>`}catch(e){console.error(e)}}
+bind('km_k',()=>{if(kmD.cents.length)kmInit()});
+
+let dbD={pts:[]};
+function dbData(){dbD.pts=[];for(let i=0;i<70;i++){const t=rnd(0,Math.PI);dbD.pts.push([-1.5+Math.cos(t)*1.3,Math.sin(t)*1.2-0.4])}for(let i=0;i<70;i++){const t=rnd(0,Math.PI);dbD.pts.push([1.5-Math.cos(t)*1.3,-Math.sin(t)*1.2+0.7])}for(let i=0;i<12;i++)dbD.pts.push([rnd(-3,3),rnd(-2,2)])}
+function dbscan(pts,eps,minP){const n=pts.length,lab=new Array(n).fill(-2);const neigh=i=>{const r=[];for(let j=0;j<n;j++)if(Math.hypot(pts[i][0]-pts[j][0],pts[i][1]-pts[j][1])<eps)r.push(j);return r};let cl=0;for(let i=0;i<n;i++){if(lab[i]!==-2)continue;const nb=neigh(i);if(nb.length<minP){lab[i]=-1;continue}lab[i]=cl;const seeds=[...nb.filter(j=>j!==i)];while(seeds.length){const j=seeds.pop();if(lab[j]===-1)lab[j]=cl;if(lab[j]!==-2)continue;lab[j]=cl;const nbj=neigh(j);if(nbj.length>=minP)seeds.push(...nbj.filter(x=>lab[x]===-2))}cl++}return lab}
+function dbDraw(){try{const g=ctx('db_cv');if(!g)return;const W=800,H=280;g.clearRect(0,0,W,H);const X=v=>(v+3.4)/6.8*W,Y=v=>260-(v+2.3)/4.6*240;const eps=+$('#db_eps').value,mp=+$('#db_min').value;const lab=dbscan(dbD.pts,eps,mp);dbD.pts.forEach((p,i)=>{const l=lab[i];dot(g,X(p[0]),Y(p[1]),4,l<0?'#3a4a5c':PAL[l%PAL.length])});$('#db_stats').innerHTML=`<div class="stat">Кластеров=<b>${Math.max(...lab)+1}</b></div><div class="stat">Шум=<b>${lab.filter(l=>l<0).length}</b></div>`}catch(e){console.error(e)}}
+bind('db_eps',dbDraw);bind('db_min',dbDraw);
+
+/* ================= 10 DIM ================= */
+let pcD={pts:[]};
+function pcGen(){pcD.pts=[];const ang=+$('#pc_ang').value*Math.PI/180,st=+$('#pc_st').value;for(let i=0;i<120;i++){let x=gauss()*0.9*st,y=gauss()*0.55;const rx=x*Math.cos(ang)-y*Math.sin(ang),ry=x*Math.sin(ang)+y*Math.cos(ang);pcD.pts.push([rx,ry])}}
+function pcDraw(){try{const g=ctx('pc_cv');if(!g)return;const W=800,H=280;g.clearRect(0,0,W,H);const mx=pcD.pts.reduce((s,p)=>s+p[0],0)/120,my=pcD.pts.reduce((s,p)=>s+p[1],0)/120;let a=0,c=0,b=0;for(const[x,y]of pcD.pts){a+=(x-mx)**2;c+=(x-mx)*(y-my);b+=(y-my)**2}a/=119;c/=119;b/=119;const tr=a+b,det=a*b-c*c,disc=Math.sqrt(Math.max(tr*tr/4-det,0));const l1=tr/2+disc,l2=tr/2-disc;let v1,v2;if(Math.abs(c)>1e-6){v1=[c,l1-a];v2=[c,l2-a]}else{v1=[1,0];v2=[0,1]}const n1=Math.hypot(...v1),n2=Math.hypot(...v2);v1=v1.map(x=>x/n1);v2=v2.map(x=>x/n2);const X=v=>400+v*90,Y=v=>140-v*80;for(const[x,y]of pcD.pts)dot(g,X(x),Y(y),3,'rgba(192,132,252,.6)');const arrow=(v,l,col)=>{const sc=Math.sqrt(l)*90*1.3;lin(g,X(0),Y(0),X(v[0]*sc/90*1.5),Y(v[1]*sc/80*1.3),col,3)};arrow(v1,l1,'#f5b942');arrow(v2,l2,'#22d3ee');if($('#pc_proj').checked){for(const[x,y]of pcD.pts){const t=(x-mx)*v1[0]+(y-my)*v1[1];dot(g,X(mx+v1[0]*t),Y(my+v1[1]*t),2,'rgba(245,185,66,.8)')}}$('#pc_stats').innerHTML=`<div class="stat">PC1 дисперсия=<b>${fmt(l1/(l1+l2)*100,1)}%</b></div>`}catch(e){console.error(e)}}
+['pc_ang','pc_st'].forEach(i=>bind(i,()=>{pcGen();pcDraw()}));$('#pc_proj').addEventListener('change',pcDraw);
+
+let tsD={X:[],Y:[],vel:[],P:null,running:false,iter:0};
+function tsGen(){tsD.X=[];for(let i=0;i<60;i++){const t=rnd(0,2*Math.PI),r=Math.random()<0.5?0.6:1.4;tsD.X.push([Math.cos(t)*r+gauss()*0.08,Math.sin(t)*r+gauss()*0.08])}tsReset()}
+function tsReset(){tsD.Y=tsD.X.map(()=>[gauss()*0.1,gauss()*0.1]);tsD.vel=tsD.X.map(()=>[0,0]);tsD.P=null;tsD.iter=0;tsDraw()}
+function tsComputeP(perp){const n=tsD.X.length,D=[];for(let i=0;i<n;i++){D[i]=[];for(let j=0;j<n;j++)D[i][j]=(tsD.X[i][0]-tsD.X[j][0])**2+(tsD.X[i][1]-tsD.X[j][1])**2}const P=[];const target=Math.log(perp);for(let i=0;i<n;i++){let lo=1e-4,hi=100,sig=10;for(let it=0;it<40;it++){sig=(lo+hi)/2;let sum=0;const p=[];for(let j=0;j<n;j++){if(j===i){p[j]=0;continue}p[j]=Math.exp(-D[i][j]/(2*sig*sig));sum+=p[j]}let H=0;for(let j=0;j<n;j++)if(p[j]>0){const q=p[j]/sum;H-=q*Math.log(q)}if(H>target)hi=sig;else lo=sig}let sum=0;P[i]=[];for(let j=0;j<n;j++){if(j===i){P[i][j]=0;continue}P[i][j]=Math.exp(-D[i][j]/(2*sig*sig));sum+=P[i][j]}for(let j=0;j<n;j++)P[i][j]/=sum}const Ps=[];for(let i=0;i<n;i++){Ps[i]=[];for(let j=0;j<n;j++)Ps[i][j]=(P[i][j]+P[j][i])/(2*n)}return Ps}
+function tsStep(){const n=tsD.Y.length,P=tsD.P,alpha=tsD.iter<100?12:1,mom=tsD.iter<250?0.5:0.8;const Q=[];let Z=0;for(let i=0;i<n;i++){Q[i]=[];for(let j=0;j<n;j++){const d=(tsD.Y[i][0]-tsD.Y[j][0])**2+(tsD.Y[i][1]-tsD.Y[j][1])**2;Q[i][j]=1/(1+d);if(i!==j)Z+=Q[i][j]}}const grad=tsD.Y.map(()=>[0,0]);for(let i=0;i<n;i++)for(let j=0;j<n;j++){if(i===j)continue;const mult=(alpha*P[i][j]-Q[i][j]/Z)*Q[i][j];grad[i][0]+=mult*(tsD.Y[i][0]-tsD.Y[j][0])*4;grad[i][1]+=mult*(tsD.Y[i][1]-tsD.Y[j][1])*4}for(let i=0;i<n;i++){tsD.vel[i][0]=mom*tsD.vel[i][0]-2*grad[i][0];tsD.vel[i][1]=mom*tsD.vel[i][1]-2*grad[i][1];tsD.Y[i][0]+=tsD.vel[i][0];tsD.Y[i][1]+=tsD.vel[i][1]}let cx=0,cy=0;for(const y of tsD.Y){cx+=y[0];cy+=y[1]}cx/=n;cy/=n;for(const y of tsD.Y){y[0]-=cx;y[1]-=cy}tsD.iter++}
+function tsDraw(){try{const g=ctx('ts_cv');if(!g)return;const W=800,H=280;g.clearRect(0,0,W,H);const X1=v=>180+v*110,Y1=v=>140-v*100;for(const p of tsD.X)dot(g,X1(p[0]),Y1(p[1]),4,'#c084fc');lin(g,400,20,400,260,'#1e2c3d');if(tsD.Y.length){let mnx=1e9,mxx=-1e9,mny=1e9,mxy=-1e9;for(const y of tsD.Y){mnx=Math.min(mnx,y[0]);mxx=Math.max(mxx,y[0]);mny=Math.min(mny,y[1]);mxy=Math.max(mxy,y[1])}const X2=v=>430+(v-mnx)/(mxx-mnx+1e-6)*340,Y2=v=>250-(v-mny)/(mxy-mny+1e-6)*210;tsD.Y.forEach((y,i)=>dot(g,X2(y[0]),Y2(y[1]),4,i%2?'#f5b942':'#2dd4bf'))}$('#ts_stats').innerHTML=`<div class="stat">Итерация: <b>${tsD.iter}</b>/400</div>`}catch(e){console.error(e)}}
+function tsRun(){if(tsD.running)return;if(!tsD.P)tsD.P=tsComputeP(+$('#ts_perp').value);tsD.running=true;$('#ts_btn').textContent='⏳ Считаю...';const tick=()=>{if(tsD.iter>=400){tsD.running=false;$('#ts_btn').textContent='▶ Запустить t-SNE';tsDraw();return}for(let i=0;i<4;i++)tsStep();tsDraw();requestAnimationFrame(tick)};tick()}
+$('#ts_perp').addEventListener('input',()=>{tsD.P=null});bind('ts_perp');
+
+/* ================= 11 APRIORI ================= */
+const apItems=['🍞','🥛','🧈','🧀','🍺','🥔'];
+let apM=[[1,1,0,1,0,1,1,0,1,1],[1,1,1,1,0,1,0,1,1,0],[0,1,0,1,1,0,0,0,1,0],[1,0,1,0,0,1,1,1,0,1],[0,1,0,0,1,0,0,0,1,1],[0,0,0,0,1,1,0,1,0,0]];
+function apRender(){const N=apM[0].length;let html='<table class="tbl"><tr><th>Товар</th>';for(let t=0;t<N;t++)html+=`<th>Чек ${t+1}</th>`;html+='</tr>';apItems.forEach((it,i)=>{html+=`<tr><td>${it}</td>`;for(let t=0;t<N;t++)html+=`<td style="cursor:pointer" onclick="apToggle(${i},${t})">${apM[i][t]?'✅':'▫️'}</td>`;html+='</tr>'});$('#ap_tbl').innerHTML=html+'</table>';apCalc()}
+function apToggle(i,t){apM[i][t]=1-apM[i][t];apRender()}
+function apCalc(){const N=apM[0].length,minS=+$('#ap_sup').value,minC=+$('#ap_conf').value;const sup=mask=>{let c=0;for(let t=0;t<N;t++){let ok=true;for(const i of mask)if(!apM[i][t]){ok=false;break}if(ok)c++}return c/N};const freq=[];for(let m=1;m<(1<<6);m++){const bits=[];for(let i=0;i<6;i++)if(m>>i&1)bits.push(i);if(bits.length>3)continue;const s=sup(bits);if(s>=minS)freq.push({bits,s})}freq.sort((a,b)=>b.s-a.s);$('#ap_sets').innerHTML=freq.slice(0,8).map(f=>`<div class="stat">{${f.bits.map(i=>apItems[i]).join(',')}} sup=<b>${fmt(f.s,2)}</b></div>`).join('')||'<div class="stat">Снизьте support</div>';const rules=[];for(const f of freq){if(f.bits.length<2)continue;for(let k=0;k<f.bits.length;k++){const A=f.bits.filter((_,i)=>i!==k),B=[f.bits[k]];const sA=sup(A);if(sA<1e-9)continue;const conf=f.s/sA;if(conf>=minC){const lift=conf/sup(B);rules.push({A,B,conf,lift})}}}rules.sort((a,b)=>b.lift-a.lift);$('#ap_rules').innerHTML=rules.slice(0,8).map(r=>`<div class="stat">${r.A.map(i=>apItems[i]).join(',')} ⇒ ${r.B.map(i=>apItems[i])} lift=<b style="color:${r.lift>1?'#2dd4bf':'#f87171'}">${fmt(r.lift,2)}</b></div>`).join('')||'<div class="stat">Нет правил</div>'}
+bind('ap_sup',apCalc);bind('ap_conf',apCalc);
+
+/* ================= 12 RL ================= */
+const RL_WALLS=[[1,1],[1,2],[3,2]],RL_LAVA=[[3,1]],RL_GOAL=[4,4];
+let Q=Array.from({length:25},()=>[0,0,0,0]),rlHist=[];
+const rlKey=(r,c)=>r*5+c,isWall=(r,c)=>RL_WALLS.some(w=>w[0]===r&&w[1]===c);
+const DR=[[-1,0],[1,0],[0,-1],[0,1]];
+function rlStepEnv(r,c,a){let nr=r+DR[a][0],nc=c+DR[a][1];if(nr<0||nr>=5||nc<0||nc>=5||isWall(nr,nc)){nr=r;nc=c}let rew=-0.02,done=false;if(nr===RL_GOAL[0]&&nc===RL_GOAL[1]){rew=1;done=true}else if(RL_LAVA.some(l=>l[0]===nr&&l[1]===nc)){rew=-1;done=true}return[nr,nc,rew,done]}
+function rlTrain(){const eps=+$('#rl_eps').value,al=+$('#rl_a').value,ga=+$('#rl_g').value;rlHist=[];for(let ep=0;ep<800;ep++){let r=Math.floor(Math.random()*5),c=Math.floor(Math.random()*5);if(isWall(r,c))continue;let total=0;for(let st=0;st<60;st++){let a;if(Math.random()<eps)a=Math.floor(Math.random()*4);else{a=0;for(let i=1;i<4;i++)if(Q[rlKey(r,c)][i]>Q[rlKey(r,c)][a])a=i}const[nr,nc,rew,done]=rlStepEnv(r,c,a);const tgt=rew+(done?0:ga*Math.max(...Q[rlKey(nr,nc)]));Q[rlKey(r,c)][a]+=al*(tgt-Q[rlKey(r,c)][a]);total+=rew;r=nr;c=nc;if(done)break}rlHist.push(total)}rlDraw()}
+function rlDraw(){try{const g=ctx('rl_cv');if(!g)return;const W=800,H=300,cs=50,ox=50,oy=20;g.clearRect(0,0,W,H);for(let r=0;r<5;r++)for(let c=0;c<5;c++){const x=ox+c*cs,y=oy+r*cs;let col='#101a26';if(isWall(r,c))col='#2a3646';if(r===RL_GOAL[0]&&c===RL_GOAL[1])col='rgba(45,212,191,.3)';if(RL_LAVA.some(l=>l[0]===r&&l[1]===c))col='rgba(248,113,113,.3)';g.fillStyle=col;g.fillRect(x+2,y+2,cs-4,cs-4);g.strokeStyle='#1e2c3d';g.strokeRect(x+2,y+2,cs-4,cs-4);if(!isWall(r,c)&&!(r===RL_GOAL[0]&&c===RL_GOAL[1])){const q=Q[rlKey(r,c)],mx=Math.max(...q);if(mx>0.01){let bi=0;for(let i=1;i<4;i++)if(q[i]>q[bi])bi=i;lin(g,x+cs/2,y+cs/2,x+cs/2+DR[bi][1]*15,y+cs/2+DR[bi][0]*15,'#f5b942',2)}}}$('#rl_stats').innerHTML=`<div class="stat">Эпизодов: <b>${rlHist.length}</b></div><div class="stat">Ср. награда: <b>${fmt(rlHist.slice(-50).reduce((a,b)=>a+b,0)/Math.min(50,rlHist.length||1))}</b></div>`}catch(e){console.error(e)}}
+function rlPlay(){let r=0,c=0;const path=[[r,c]];for(let st=0;st<25;st++){let a=0;const q=Q[rlKey(r,c)];for(let i=1;i<4;i++)if(q[i]>q[a])a=i;const[nr,nc,,done]=rlStepEnv(r,c,a);r=nr;c=nc;path.push([r,c]);if(done)break}let i=0;const anim=()=>{rlDraw();const cs=50,ox=50,oy=20;const g=ctx('rl_cv');if(g)dot(g,ox+path[i][1]*cs+cs/2,oy+path[i][0]*cs+cs/2,8,'#fff');i++;if(i<path.length)setTimeout(anim,200);else setTimeout(()=>rlDraw(),600)};anim()}
+function rlReset(){Q=Array.from({length:25},()=>[0,0,0,0]);rlHist=[];rlDraw()}
+['rl_eps','rl_a','rl_g'].forEach(i=>bind(i));
+
+/* ================= 13 CORE ================= */
+function bpCalc(){const x1=+$('#bp_x1').value,x2=0.5,w1=+$('#bp_w1').value,w2=+$('#bp_w2').value,b=+$('#bp_b').value;const z=w1*x1+w2*x2+b,p=sig(z),L=-(Math.log(p+1e-12));const dz=p-1,dw1=dz*x1,dw2=dz*x2,db=dz;return{x1,w1,w2,b,z,p,L,dw1,dw2,db}}
+function bpDraw(){try{const g=ctx('bp_cv');if(!g)return;const W=800,H=240;g.clearRect(0,0,W,H);const s=bpCalc();const box=(x,y,w,h,l1,l2,col)=>{g.fillStyle='#15202e';g.strokeStyle=col;g.lineWidth=1.5;g.beginPath();g.rect(x,y,w,h);g.fill();g.stroke();txt(g,l1,x+w/2,y+h/2-6,col,12,'center');if(l2)txt(g,l2,x+w/2,y+h/2+10,'#e7eef5',11,'center')};box(30,30,120,50,'Входы',`x₁=${fmt(s.x1,1)}`,'#60a5fa');box(220,30,160,50,'Нейрон','z='+fmt(s.z,2),'#2dd4bf');box(460,30,130,50,'σ(z)','p='+fmt(s.p,3),'#f5b942');box(660,30,110,50,'Loss',fmt(s.L,3),'#f87171');lin(g,150,55,220,55,'#5c7186',2);lin(g,380,55,460,55,'#5c7186',2);lin(g,590,55,660,55,'#5c7186',2);txt(g,'∂L/∂w₁='+fmt(s.dw1,3),60,200,'#f87171');txt(g,'∂L/∂w₂='+fmt(s.dw2,3),250,200,'#f87171');$('#bp_stats').innerHTML=`<div class="stat">p=<b>${fmt(s.p,3)}</b></div><div class="stat">L=<b>${fmt(s.L,3)}</b></div>`}catch(e){console.error(e)}}
+function bpStep(){const s=bpCalc(),lr=1;$('#bp_w1').value=s.w1-lr*s.dw1;$('#bp_w2').value=s.w2-lr*s.dw2;$('#bp_b').value=s.b-lr*s.db;bpDraw()}
+['bp_x1','bp_w1','bp_w2','bp_b'].forEach(i=>bind(i,bpDraw));
+
+const beale=(x,y)=>(1.5-x+x*y)**2+(2.25-x+x*y*y)**2+(2.625-x+x*y*y*y)**2;
+function bealeGrad(x,y){const a=1.5-x+x*y,b=2.25-x+x*y*y,c=2.625-x+x*y*y*y;return[2*a*(y-1)+2*b*(y*y-1)+2*c*(y*y*y-1),2*a*x+4*b*x*y+6*c*x*y*y]}
+let opD={heat:null,trajs:[]};
+function opMakeHeat(){const c=document.createElement('canvas');c.width=160;c.height=60;const g=c.getContext('2d');const img=g.createImageData(160,60);for(let py=0;py<60;py++)for(let px=0;px<160;px++){const x=-4.5+px/160*9,y=4.5-py/60*9;let v=Math.log(1+beale(x,y))/11;if(v>1)v=1;const idx=(py*160+px)*4;img.data[idx]=20+v*150;img.data[idx+1]=30+v*60;img.data[idx+2]=60+(1-v)*80;img.data[idx+3]=255}g.putImageData(img,0,0);opD.heat=c}
+const opX=v=>50+(v+4.5)/9*700,opY=v=>280-(v+4.5)/9*260;
+function opDraw(){try{const g=ctx('op_cv');if(!g)return;g.clearRect(0,0,800,300);if(opD.heat)g.drawImage(opD.heat,0,0,800,300);dot(g,opX(3),opY(0.5),5,'#a3e635');const cols=['#60a5fa','#f5b942','#f472b6'];opD.trajs.forEach((t,i)=>{g.beginPath();t.pts.forEach((p,j)=>{j?g.lineTo(opX(p[0]),opY(p[1])):g.moveTo(opX(p[0]),opY(p[1]))});g.strokeStyle=cols[i];g.lineWidth=2;g.stroke();const last=t.pts[t.pts.length-1];if(last)dot(g,opX(last[0]),opY(last[1]),4,cols[i])});$('#op_stats').innerHTML=opD.trajs.length?opD.trajs.map((t,i)=>`<div class="stat">${['SGD','Mom','Adam'][i]}: <b>${fmt(beale(t.pts[t.pts.length-1][0],t.pts[t.pts.length-1][1]))}</b></div>`).join(''):''}catch(e){console.error(e)}}
+function opReset(){opD.trajs=[];opDraw()}
+function opRun(){opD.trajs=[];const lr=+$('#op_lr').value,st=[-3.5,3.2];const mk=()=>({pts:[st.slice()],m:[0,0],v:[0,0]});const T=[mk(),mk(),mk()];let step=0;const tick=()=>{step++;for(let i=0;i<3;i++){const t=T[i];const p=t.pts[t.pts.length-1];let gr=bealeGrad(p[0],p[1]);const nm=Math.hypot(...gr);if(nm>60)gr=gr.map(x=>x*60/nm);if(i===0){p[0]-=lr*gr[0];p[1]-=lr*gr[1]}else if(i===1){t.m=t.m.map((m,j)=>0.9*m+gr[j]);p[0]-=lr*t.m[0];p[1]-=lr*t.m[1]}else{t.m=t.m.map((m,j)=>0.9*m+0.1*gr[j]);t.v=t.v.map((v,j)=>0.999*v+0.001*gr[j]*gr[j]);for(let j=0;j<2;j++){const mh=t.m[j]/(1-0.9**step),vh=t.v[j]/(1-0.999**step);if(j===0)p[0]-=lr*mh/(Math.sqrt(vh)+1e-8);else p[1]-=lr*mh/(Math.sqrt(vh)+1e-8)}}p[0]=Math.max(-4.5,Math.min(4.5,p[0]));p[1]=Math.max(-4.5,Math.min(4.5,p[1]));t.pts.push(p.slice())}opD.trajs=T;opDraw();if(step<250)requestAnimationFrame(tick)};tick()}
+opMakeHeat();bind('op_lr');
+
+/* ================= 14 CNN ================= */
+const cvImgs={vert:[[0,1,0,1,0,1,0,1],[0,1,0,1,0,1,0,1],[0,1,0,1,0,1,0,1],[0,1,0,1,0,1,0,1],[0,1,0,1,0,1,0,1],[0,1,0,1,0,1,0,1],[0,1,0,1,0,1,0,1],[0,1,0,1,0,1,0,1]],horz:[[0,0,0,0,0,0,0,0],[1,1,1,1,1,1,1,1],[0,0,0,0,0,0,0,0],[1,1,1,1,1,1,1,1],[0,0,0,0,0,0,0,0],[1,1,1,1,1,1,1,1],[0,0,0,0,0,0,0,0],[1,1,1,1,1,1,1,1]],face:[[0,0,1,1,1,1,0,0],[0,1,0,0,0,0,1,0],[1,0,1,0,0,1,0,1],[1,0,0,0,0,0,0,1],[1,0,1,0,0,1,0,1],[1,0,0,1,1,0,0,1],[0,1,0,0,0,0,1,0],[0,0,1,1,1,1,0,0]]};
+const cvKernels={sobelx:[[-1,0,1],[-2,0,2],[-1,0,1]],blur:[[1,1,1],[1,1,1],[1,1,1]].map(r=>r.map(v=>v/9)),sharpen:[[0,-1,0],[-1,5,-1],[0,-1,0]]};
+let cvIn=cvImgs.vert.map(r=>r.slice());
+function conv2d(img,K,S,P){const n=img.length,out=[];for(let i=-P;i<=n-3+P;i+=S){const row=[];for(let j=-P;j<=n-3+P;j+=S){let s=0;for(let u=0;u<3;u++)for(let v=0;v<3;v++){const ii=i+u,jj=j+v;if(ii>=0&&ii<n&&jj>=0&&jj<n)s+=K[u][v]*img[ii][jj]}row.push(s)}out.push(row)}return out}
+function maxpool(m){const out=[];for(let i=0;i<m.length-1;i+=2){const row=[];for(let j=0;j<m[i].length-1;j+=2)row.push(Math.max(m[i][j],m[i][j+1],m[i+1][j],m[i+1][j+1]));out.push(row)}return out}
+function cvDraw(){try{const g=ctx('cv_cv');if(!g)return;const W=800,H=300;g.clearRect(0,0,W,H);const K=cvKernels[$('#cv_ker').value],S=1;let out=conv2d(cvIn,K,S,1);if($('#cv_pool').checked)out=maxpool(out);const cs=28,ox=30,oy=30;for(let i=0;i<8;i++)for(let j=0;j<8;j++){g.fillStyle=cvIn[i][j]>0?`rgba(96,165,250,${0.15+cvIn[i][j]*0.75})`:'#0d141d';g.fillRect(ox+j*cs,oy+i*cs,cs-2,cs-2)}for(let i=0;i<3;i++)for(let j=0;j<3;j++){const v=K[i][j];g.fillStyle=v>0?`rgba(45,212,191,${Math.min(1,Math.abs(v)/2)})`:`rgba(244,114,182,${Math.min(1,Math.abs(v)/2)})`;g.fillRect(300+j*24,30+i*24,22,22)}const ocs=Math.min(30,250/out.length),mx=Math.max(...out.flat().map(Math.abs),0.01);for(let i=0;i<out.length;i++)for(let j=0;j<out[0].length;j++){const v=out[i][j];g.fillStyle=v>=0?`rgba(45,212,191,${0.08+Math.abs(v)/mx*0.8})`:`rgba(244,114,182,${0.08+Math.abs(v)/mx*0.8})`;g.fillRect(450+j*ocs,30+i*ocs,ocs-2,ocs-2)}$('#cv_stats').innerHTML=`<div class="stat">Выход: <b>${out.length}×${out[0].length}</b></div>`}catch(e){console.error(e)}}
+$('#cv_img').addEventListener('change',e=>{cvIn=cvImgs[e.target.value]?cvImgs[e.target.value].map(r=>r.slice()):cvIn;cvDraw()});
+$('#cv_ker').addEventListener('change',cvDraw);$('#cv_pool').addEventListener('change',cvDraw);
+
+/* ================= 15 RNN ================= */
+function lsDraw(){try{const g=ctx('ls_cv');if(!g)return;const W=800,H=240;g.clearRect(0,0,W,H);const f=+$('#ls_f').value,ii=+$('#ls_i').value,o=+$('#ls_o').value;let C=0;const Cs=[],Hs=[],xs=[0,1,0,0,0];lin(g,30,120,W-30,120,'#1e2c3d');xs.forEach((x,t)=>{C=f*C+ii*0.8;const h=o*Math.tanh(C);Cs.push(C);Hs.push(h)});Cs.forEach((v,t)=>{const x=100+t*130;lin(g,x,120,x,120-v*80,'rgba(96,165,250,.7)',3);dot(g,x,120-v*80,4,'#60a5fa');lin(g,x,120,x,120-Hs[t]*80,'#f5b942',3);dot(g,x,120-Hs[t]*80,4,'#f5b942')});$('#ls_stats').innerHTML=`<div class="stat">C[конец]=<b>${fmt(Cs[4])}</b></div><div class="stat">Память: <b>${fmt(Cs[4]/Cs[1],1)}×</b></div>`}catch(e){console.error(e)}}
+['ls_f','ls_i','ls_o'].forEach(i=>bind(i,lsDraw));
+
+/* ================= 16 TRANSFORMER ================= */
+const atTok=['кот','сидит','на','коврике','и','мурчит'];
+let atE=[],atWq=[],atWk=[],atWv=[];
+(function(){let seed=7;const r=()=>{seed=(seed*16807)%2147483647;return seed/2147483647-0.5};const d=8;for(let t=0;t<7;t++){atE[t]=[];for(let j=0;j<d;j++)atE[t].push(r()*2)}atE[0][0]+=1.2;atE[5][0]+=1.0;atE[1][1]+=1.1;atE[2][1]+=0.8;const mk=()=>{const W=[];for(let i=0;i<d;i++){W[i]=[];for(let j=0;j<d;j++)W[i][j]=r()*1.2}return W};atWq=mk();atWk=mk();atWv=mk()})();
+function matVec(W,v){return W.map(row=>row.reduce((s,w,j)=>s+w*v[j],0))}
+function atCompute(){const T=+$('#at_t').value,d=8;const Q=atE.map(e=>matVec(atWq,e)),K=atE.map(e=>matVec(atWk,e)),V=atE.map(e=>matVec(atWv,e));const scores=Q.map(q=>K.map(k=>q.reduce((s,qi,i)=>s+qi*k[i],0)/(Math.sqrt(d)*T)));const mxs=scores.map(r=>Math.max(...r));const A=scores.map((r,i)=>{const ex=r.map(v=>Math.exp(v-mxs[i]));const sm=ex.reduce((a,b)=>a+b);return ex.map(v=>v/sm)});return{A,V}}
+function atDraw(){try{const g=ctx('at_cv');if(!g)return;const W=800,H=300;g.clearRect(0,0,W,H);const{A,V}=atCompute(),sel=Math.min(+$('#at_sel').value,6);const cs=32,ox=30,oy=60;atTok.forEach((t,i)=>{txt(g,t,ox+i*cs+cs/2,50,i===sel?'#f5b942':'#8ba1b6',10,'center');txt(g,t,22,oy+i*cs+cs/2+3,i===sel?'#f5b942':'#8ba1b6',10,'right')});for(let i=0;i<7;i++)for(let j=0;j<7;j++){g.fillStyle=`rgba(232,121,249,${0.06+A[i][j]*1.6})`;g.fillRect(ox+j*cs,oy+i*cs,cs-2,cs-2);if(i===sel){g.strokeStyle='#f5b942';g.strokeRect(ox+j*cs,oy+i*cs,cs-2,cs-2)}txt(g,fmt(A[i][j],2),ox+j*cs+4,oy+i*cs+cs/2+3,A[i][j]>0.35?'#0a0e13':'#8ba1b6',9)}const px=300;txt(g,'«'+atTok[sel]+'» смотрит на:',px,30,'#f5b942',12);A[sel].forEach((w,j)=>{const bw=w*200;g.fillStyle='rgba(232,121,249,.8)';g.fillRect(px,50+j*26,bw,14);txt(g,atTok[j]+' '+fmt(w*100,0)+'%',px+bw+6,62+j*26,'#e7eef5',10)});$('#at_stats').innerHTML=`<div class="stat">Топ: <b>${atTok[A[sel].indexOf(Math.max(...A[sel]))]}</b> (${fmt(Math.max(...A[sel])*100,0)}%)</div>`}catch(e){console.error(e)}}
+bind('at_t',atDraw);bind('at_sel',atDraw);
+
+/* ================= PLAYGROUND ================= */
+let pgD={X:[],y:[],model:null,training:false,hist:{loss:[],acc:[]}};
+function pgGenData(){const kind=$('#pg_data').value,n=160;pgD.X=[];pgD.y=[];for(let i=0;i<n;i++){let x,y,l;if(kind==='circles'){l=Math.random()<0.5;const t=rnd(0,2*Math.PI),r=l?rnd(0,0.4):rnd(0.85,1.1);x=Math.cos(t)*r+gauss()*0.04;y=Math.sin(t)*r+gauss()*0.04}else if(kind==='moons'){l=Math.random()<0.5;const t=rnd(0,Math.PI);if(l){x=Math.cos(t);y=Math.sin(t)}else{x=1-Math.cos(t);y=0.5-Math.sin(t)}x+=gauss()*0.08;y+=gauss()*0.08}else{const t=rnd(0,3*Math.PI),rr=t/(3*Math.PI);l=i%2;const off=l*Math.PI;x=rr*Math.cos(t+off)+gauss()*0.06;y=rr*Math.sin(t+off)+gauss()*0.06}pgD.X.push([x,y]);pgD.y.push(l)}pgD.hist={loss:[],acc:[]};pgDraw()}
+function pgDraw(){try{const g=ctx('pg_bound');if(!g)return;const W=400,H=340;g.clearRect(0,0,W,H);const X=v=>(v+1.3)/2.6*W,Y=v=>330-(v+1.3)/2.6*320;for(let py=0;py<H;py+=10)for(let px=0;px<W;px+=10){const x=px/W*2.6-1.3,y=(330-py)/320*2.6-1.3;let p=0.5;if(pgD.model)p=tf.tidy(()=>pgD.model.predict(tf.tensor2d([[x,y]])).dataSync()[0]);g.fillStyle=p>0.5?`rgba(45,212,191,${(p-.5)*0.7})`:`rgba(244,114,182,${(.5-p)*0.7})`;g.fillRect(px,py,10,10)}pgD.X.forEach((p,i)=>dot(g,X(p[0]),Y(p[1]),3,pgD.y[i]?'#2dd4bf':'#f472b6'));const g2=ctx('pg_charts');if(!g2)return;g2.clearRect(0,0,400,340);lin(g2,30,20,30,310,'#1e2c3d');lin(g2,30,310,380,310,'#1e2c3d');const h=pgD.hist;if(h.loss.length>1){const mx=Math.max(...h.loss,0.1);g2.beginPath();h.loss.forEach((v,i)=>{const x=30+i/(h.loss.length-1)*340,y=310-v/mx*270;i?g2.lineTo(x,y):g2.moveTo(x,y)});g2.strokeStyle='#60a5fa';g2.lineWidth=2;g2.stroke();g2.beginPath();h.acc.forEach((v,i)=>{const x=30+i/(h.acc.length-1)*340,y=310-v*270;i?g2.lineTo(x,y):g2.moveTo(x,y)});g2.strokeStyle='#4ade80';g2.lineWidth=2;g2.stroke()}}catch(e){console.error(e)}}
+async function pgTrain(){if(typeof tf==='undefined'){$('#pg_stats').innerHTML='<div class="stat">⚠ TF.js не загружен</div>';return}if(pgD.training)return;pgD.training=true;$('#pg_btn').textContent='⏳ Обучение...';const L=+$('#pg_l').value,Un=+$('#pg_w').value;if(pgD.model)pgD.model.dispose();pgD.model=tf.sequential();pgD.model.add(tf.layers.dense({units:Un,activation:'relu',inputDim:2}));for(let i=1;i<L;i++)pgD.model.add(tf.layers.dense({units:Un,activation:'relu'}));pgD.model.add(tf.layers.dense({units:1,activation:'sigmoid'}));pgD.model.compile({optimizer:tf.train.adam(0.05),loss:'binaryCrossentropy',metrics:['accuracy']});const xs=tf.tensor2d(pgD.X),ys=tf.tensor2d(pgD.y.map(v=>[v]));pgD.hist={loss:[],acc:[]};await pgD.model.fit(xs,ys,{epochs:200,batchSize:32,shuffle:true,callbacks:{onEpochEnd:(ep,logs)=>{if(ep%5===0){pgD.hist.loss.push(logs.loss);pgD.hist.acc.push(logs.acc);pgDraw();$('#pg_stats').innerHTML=`<div class="stat">Эпоха <b>${ep}</b>/200</div><div class="stat">Loss <b>${fmt(logs.loss,3)}</b></div><div class="stat">Acc <b>${fmt(logs.acc*100,1)}%</b></div>`}}}});xs.dispose();ys.dispose();pgDraw();pgD.training=false;$('#pg_btn').textContent='▶ Обучить'}
+['pg_w','pg_l'].forEach(i=>bind(i));$('#pg_data').addEventListener('change',pgGenData);
+
+/* ================= CSV LAB ================= */
+let csvD={header:[],rows:[],numCols:[]};
+function parseCSV(text){const lines=text.trim().split(/\r?\n/).filter(l=>l.trim());const delim=(lines[0].match(/;/g)||[]).length>(lines[0].match(/,/g)||[]).length?';':',';const parseLine=l=>{const out=[];let cur='',q=false;for(let i=0;i<l.length;i++){const ch=l[i];if(ch==='"'){q=!q;continue}if(ch===delim&&!q){out.push(cur);cur='';continue}cur+=ch}out.push(cur);return out.map(s=>s.trim())};const header=parseLine(lines[0]);const rows=lines.slice(1).map(parseLine);return{header,rows}}
+$('#csv_file').addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;const rd=new FileReader();rd.onload=()=>csvLoad(rd.result);rd.readAsText(f)});
+function csvLoad(text){try{const{header,rows}=parseCSV(text);csvD.header=header;csvD.rows=rows.filter(r=>r.length===header.length);csvD.numCols=header.map((h,i)=>{let num=0;for(const r of csvD.rows)if(r[i]!==''&&!isNaN(parseFloat(r[i])))num++;return num/csvD.rows.length>0.8});$('#csv_info').innerHTML=`<div class="stat">Строк: <b>${csvD.rows.length}</b></div><div class="stat">Колонок: <b>${header.length}</b></div><div class="stat">Числовых: <b>${csvD.numCols.filter(Boolean).length}</b></div>`;let ph='<tr>'+header.map(h=>`<th>${h}</th>`).join('')+'</tr>';csvD.rows.slice(0,5).forEach(r=>ph+='<tr>'+r.map(c=>`<td>${c}</td>`).join('')+'</tr>');$('#csv_preview').innerHTML=ph;const sel=(id,only)=>{$('#'+id).innerHTML=header.map((h,i)=>only&&!csvD.numCols[i]?'':`<option value="${i}">${h}</option>`).join('')};sel('csv_target',true);sel('csv_kx',true);sel('csv_ky',true)}catch(e){console.error('CSV Error:',e);$('#csv_info').innerHTML='<div class="stat" style="color:#f87171">Ошибка парсинга CSV</div>'}}
+function csvGen(kind){let h,rows=[];if(kind==='housing'){h=['area','rooms','age','price'];for(let i=0;i<150;i++){const a=rnd(25,120),rm=Math.round(a/28+rnd(0,1)),age=rnd(0,60);rows.push([a,rm,age,a*90-rm*150-age*400+gauss()*6000].map(v=>fmt(v,1)))}}else{h=['petal_len','petal_wid','sepal_len','class'];for(let i=0;i<150;i++){const c=i%3;rows.push([rnd(1,6)+c*1.5,rnd(0.3,2)+c*0.5,rnd(4,7)+c*0.5,c].map(v=>fmt(v,2)))}}csvLoad(h.join(',')+'\n'+rows.map(r=>r.join(',')).join('\n'))}
+function csvNumMatrix(cols){return csvD.rows.map(r=>cols.map(c=>parseFloat(r[c])||0))}
+function csvRegress(){const t=+$('#csv_target').value;const feats=csvD.header.map((_,i)=>i).filter(i=>i!==t&&csvD.numCols[i]).slice(0,5);if(!feats.length){$('#csv_regout').textContent='Нет числовых признаков';return}const X=csvNumMatrix(feats).map(r=>[1,...r]),y=csvNumMatrix([t]).map(r=>r[0]);const m=feats.length+1,A=Array.from({length:m},()=>new Array(m).fill(0)),b=new Array(m).fill(0);X.forEach((row,i)=>{for(let a=0;a<m;a++){b[a]+=row[a]*y[i];for(let c=0;c<m;c++)A[a][c]+=row[a]*row[c]}});let w;try{w=gaussSolve(A,b)}catch{w=new Array(m).fill(0)}const pred=X.map(r=>r.reduce((s,v,i)=>s+v*w[i],0));const my=y.reduce((a,b)=>a+b)/y.length;const ssr=pred.reduce((s,p,i)=>s+(y[i]-p)**2,0),sst=y.reduce((s,v)=>s+(v-my)**2,0);const r2=1-ssr/sst,rmse=Math.sqrt(ssr/y.length);$('#csv_regout').innerHTML=`Признаки: <b>${feats.map(f=>csvD.header[f]).join(', ')}</b><br><b style="color:#2dd4bf">R² = ${fmt(r2,3)}</b> · RMSE = <b>${fmt(rmse,2)}</b>`}
+function csvCluster(){const kx=+$('#csv_kx').value,ky=+$('#csv_ky').value,k=+$('#csv_kk').value;let pts=csvD.rows.map(r=>[parseFloat(r[kx]),parseFloat(r[ky])]).filter(p=>isFinite(p[0])&&isFinite(p[1]));if(pts.length<4)return;const mnx=Math.min(...pts.map(p=>p[0])),mxx=Math.max(...pts.map(p=>p[0])),mny=Math.min(...pts.map(p=>p[1])),mxy=Math.max(...pts.map(p=>p[1]));pts=pts.map(p=>[(p[0]-mnx)/(mxx-mnx||1)*4-2,(p[1]-mny)/(mxy-mny||1)*4-2]);let cents=pts.filter((_,i)=>i%Math.ceil(pts.length/k)===0).slice(0,k).map(p=>p.slice());let labels=[];for(let it=0;it<25;it++){labels=pts.map(p=>{let bi=0,bd=1e9;cents.forEach((c,i)=>{const d=(c[0]-p[0])**2+(c[1]-p[1])**2;if(d<bd){bd=d;bi=i}});return bi});cents=cents.map((c,i)=>{const grp=pts.filter((_,j)=>labels[j]===i);if(!grp.length)return c;return[grp.reduce((s,p)=>s+p[0],0)/grp.length,grp.reduce((s,p)=>s+p[1],0)/grp.length]})}try{const g=ctx('csv_kcv');if(!g)return;const W=400,H=250;g.clearRect(0,0,W,H);const X=v=>(v+2.2)/4.4*W,Y=v=>240-(v+2.2)/4.4*220;pts.forEach((p,i)=>dot(g,X(p[0]),Y(p[1]),4,PAL[labels[i]%PAL.length]));cents.forEach((c,i)=>{lin(g,X(c[0])-7,Y(c[1]),X(c[0])+7,Y(c[1]),'#fff',3);lin(g,X(c[0]),Y(c[1])-7,X(c[0]),Y(c[1])+7,'#fff',3)})}catch(e){console.error(e)}}
+bind('csv_kk');
+
+/* ================= EXAM (RU) ================= */
+const QB=[
+{t:'t-linreg',q:'Что минимизирует линейная регрессия?',a:['Средний квадрат ошибок (MSE)','Средний модуль ошибки','Число признаков','Вероятность класса'],c:0,e:'MSE = среднее квадратов отклонений. Гладкая выпуклая функция с аналитическим решением.'},
+{t:'t-linreg',q:'Увеличили λ в Ridge. Что с весами?',a:['Все обнулятся','Плавно уменьшатся, но не до нуля','Вырастут','Не изменятся'],c:1,e:'L2-штраф сжимает веса к нулю, но не обнуляет. Обнуляет — L1 (Lasso).'},
+{t:'t-linreg',q:'Когда работает аналитическое решение w=(XᵀX)⁻¹Xᵀy?',a:['Всегда','Когда XᵀX обратима','Только для классификации','Когда p > n'],c:1,e:'Нужна обратимость матрицы Грама. При мультиколлинеарности или p>n она вырождается → Ridge.'},
+{t:'t-linreg',q:'Зачем стандартизировать признаки перед Lasso?',a:['Для скорости','Чтобы штраф был честным по всем признакам','Это не нужно','Для нормальности ошибок'],c:1,e:'Иначе признак с большим размахом получит несправедливо большой штраф.'},
+{t:'t-poly',q:'Полином степени 12 идеально проходит через все точки. Это…',a:['Отлично','Переобучение: test-ошибка будет большой','Недообучение','Норма'],c:1,e:'Низкий train MSE + высокий разрыв с тестом = модель запомнила шум.'},
+{t:'t-logreg',q:'Чему равна σ(0)?',a:['0','0.5','1','Не определена'],c:1,e:'σ(0)=1/(1+e⁰)=1/2. Граница решения — там, где z=0.'},
+{t:'t-logreg',q:'Что возвращает логистическая регрессия?',a:['Класс напрямую','Вероятность класса','Расстояние до границы','Остатки'],c:1,e:'σ(z) ∈ (0,1) — вероятность класса 1; дальше сравниваем с порогом.'},
+{t:'t-logreg',q:'Почему для логрега берут cross-entropy, а не MSE?',a:['Быстрее считается','С MSE градиенты «плоские» из-за сигмоиды','MSE не работает с числами','Разницы нет'],c:1,e:'Производная сигмоиды мала на краях → с MSE обучение ползёт. CE сокращается с производной сигмоиды.'},
+{t:'t-svm',q:'Ширина зазора SVM равна…',a:['‖w‖','2/‖w‖','C','1/√d'],c:1,e:'Расстояние между wᵀx+b=±1 равно 2/‖w‖.'},
+{t:'t-svm',q:'Большое C в SVM означает…',a:['Шире зазор, терпим ошибки','Уже зазор, сильнее штраф за ошибки','Ничего','Меньше опорных векторов'],c:1,e:'Большой C жёстко наказывает за выход за полосу: модель подстраивается под все точки, включая шум.'},
+{t:'t-svm',q:'Ядерный трюк нужен, чтобы…',a:['Ускорить обучение','Разделять нелинейно, считая только K(x,x′)','Отбирать признаки','Нормализовать данные'],c:1,e:'Ядро заменяет скалярное произведение в пространстве φ, не вычисляя φ явно.'},
+{t:'t-bayes',q:'Почему Байес «наивный»?',a:['Плохо работает','Предполагает независимость признаков внутри класса','Не использует теорему Байеса','Обучается без данных'],c:1,e:'P(x|y) раскладывается в произведение по признакам. Наивно, но эффективно.'},
+{t:'t-bayes',q:'Сглаживание Лапласа нужно, чтобы…',a:['Ускорить счёт','Не получить нулевую вероятность у невиданных слов','Уменьшить выборку','Отцентрировать данные'],c:1,e:'Одно нулевое P(слово|класс) обнуляет всё произведение.'},
+{t:'t-knn',q:'При росте k в k-NN граница…',a:['Становится рваной','Сглаживается, смещение растёт','Всегда улучшается','Не меняется'],c:1,e:'k=1 запоминает шум; большие k усредняют — плавно, но могут захватить чужой класс.'},
+{t:'t-knn',q:'Почему перед k-NN обязательно масштабировать?',a:['Для красоты','Признак с большим размахом доминирует в расстоянии','Ускоряет в 100 раз','Иначе не хватит памяти'],c:1,e:'Расстояние считается по всем осям; ось с размахом 10000 задавит ось с размахом 1.'},
+{t:'t-tree',q:'Джини чистого листа равен…',a:['1','0','0.5','Зависит от размера'],c:1,e:'В чистом листе одна категория: 1−1²=0.'},
+{t:'t-tree',q:'Глубина дерева растёт без ограничений. Результат?',a:['Улучшение','Недообучение','Переобучение: листья по одной точке','Линейная граница'],c:2,e:'Без регуляризации дерево дробит данные до чистых листьев из 1–2 точек.'},
+{t:'t-tree',q:'Как дерево выбирает сплит?',a:['Случайно','Максимальный прирост чистоты (Gain)','Минимальный порог','По алфавиту'],c:1,e:'Жадно перебираем признаки и пороги, берём максимум Gini-выигрыша.'},
+{t:'t-ens',q:'Бэггинг (Random Forest) снижает…',a:['Смещение','Дисперсию','Число признаков','Размер данных'],c:1,e:'Усреднение декоррелированных моделей гасит разброс предсказаний.'},
+{t:'t-ens',q:'Каждое дерево в бустинге учит…',a:['Исходные данные','Остатки (антиградиент) текущего ансамбля','Случайные данные','Метки соседей'],c:1,e:'Fₘ = Fₘ₋₁ + ν·hₘ, где hₘ приближает остатки.'},
+{t:'t-ens',q:'Случайные признаки в RF нужны для…',a:['Скорости','Декорреляции деревьев','Регуляризации от шума','Требования sklearn'],c:1,e:'Чем меньше корреляция деревьев ρ, тем сильнее усреднение снижает дисперсию.'},
+{t:'t-ens',q:'Особенность XGBoost:',a:['Только градиент','2-й порядок Тейлора + регуляризация','Нет регуляризации','CE без весов'],c:1,e:'Второй порядок даёт точнее шаг; γT + λ‖w‖²/2 контролируют сложность.'},
+{t:'t-clus',q:'Почему важна инициализация k-means?',a:['Не важна','Случайные точки → плохой локальный минимум → k-means++','Ломает алгоритм','Всегда первые k точек'],c:1,e:'K-means находит локальный минимум; умная инициализация + несколько рестартов.'},
+{t:'t-clus',q:'Преимущество DBSCAN перед k-means:',a:['Быстрее','Кластеры любой формы + детекция шума','Нет параметров','Больше кластеров'],c:1,e:'DBSCAN строит области плотности: ловит «полумесяцы» и помечает выбросы.'},
+{t:'t-clus',q:'Метод локтя нужен для…',a:['Выбора признаков','Выбора k по излому inertia','Оценки времени','Борьбы с шумом'],c:1,e:'Строим inertia(k) и ищем точку, после которой падение прекращается.'},
+{t:'t-dim',q:'Первая главная компонента — направление…',a:['Минимальной дисперсии','Максимальной дисперсии','Случайное','К ближайшему соседу'],c:1,e:'PCA максимизирует дисперсию проекции: собственный вектор с наибольшим λ.'},
+{t:'t-dim',q:'t-SNE отличается от PCA тем, что…',a:['Линейный и быстрее','Нелинейный, только для визуализации, нет transform','Сохраняет глобальные расстояния','Есть transform'],c:1,e:'t-SNE не умеет отображать новые точки и искажает глобальную геометрию.'},
+{t:'t-dim',q:'UMAP умеет то, чего не умеет t-SNE:',a:['Работать с 2D','Быстрее + transform для новых данных','Ярче цвета','Ничего'],c:1,e:'UMAP строит граф соседства, быстрее и сохраняет глобальную структуру.'},
+{t:'t-apriori',q:'Support набора {молоко, хлеб} = …',a:['Доля корзин с обоими товарами','Доля молока среди хлебов','Число корзин','Цена набора'],c:0,e:'Support = частота встречаемости набора среди всех транзакций.'},
+{t:'t-apriori',q:'Lift > 1 означает…',a:['Товары связаны положительно','Правило бесполезно','Конфликт','Низкую поддержку'],c:0,e:'lift = P(A∩B)/(P(A)P(B)): больше единицы — положительная связь.'},
+{t:'t-apriori',q:'Ключевое свойство Apriori:',a:['Подмножество частого набора — частое','Все наборы частые','Правила симметричны','Support аддитивен'],c:0,e:'Если пара редкая — все надмножества можно отбросить без проверки.'},
+{t:'t-rl',q:'γ → 0 означает, что агент…',a:['Дальновидный','Живёт одним шагом (немедленная награда)','Перестаёт учиться','Увеличивает эпизоды'],c:1,e:'Дисконт обесценивает будущее: Gₜ ≈ rₜ₊₁.'},
+{t:'t-rl',q:'ε в ε-greedy нужна для…',a:['Скорости','Исследования (случайные действия)','Уменьшения наград','Размера батча'],c:1,e:'Без исследования агент застрянет в первой найденной стратегии.'},
+{t:'t-rl',q:'Target network в DQN нужна для…',a:['Экономии памяти','Стабильности: цель не «убегает» от обучаемой сети','Ускорения инференса','Не нужна'],c:1,e:'Цель считается зафиксированной копией, обновляемой раз в N шагов.'},
+{t:'t-rl',q:'Клип в PPO делает…',a:['Ускоряет сбор данных','Ограничивает шаг политики, предотвращая разрушение','Обрезает награды','Сжимает состояния'],c:1,e:'min(ratio·A, clip(ratio,1±ε)·A) не даёт одному обновлению сломать политику.'},
+{t:'t-core',q:'Backpropagation — это применение…',a:['Монте-Карло','Цепного правила дифференцирования','Метода Ньютона','Случайного поиска'],c:1,e:'Градиент композиции = произведение локальных производных, справа налево.'},
+{t:'t-core',q:'Adam сочетает идеи…',a:['SGD и k-NN','Momentum + адаптивный шаг (RMSProp)','Логрега и SVM','PCA и t-SNE'],c:1,e:'m = среднее градиентов, v = среднее квадратов. Адаптивный шаг на параметр.'},
+{t:'t-core',q:'Главный риск чистого ReLU:',a:['Переполнение','«Мёртвые нейроны»: градиент 0 при x<0','Слишком быстрый рост','Несовместимость с CNN'],c:1,e:'Если вход нейрона всегда <0, он перестаёт обновляться. Лечатся LeakyReLU/GELU.'},
+{t:'t-core',q:'Сумма выходов softmax…',a:['Равна 0','Всегда равна 1','Любая','Равна числу классов'],c:1,e:'Softmax превращает логиты в вероятностное распределение.'},
+{t:'t-core',q:'Инициализация He (σ²=2/n) создана для…',a:['Сигмоиды','ReLU-сетей','Линейной регрессии','Деревьев'],c:1,e:'У ReLU «работает» половина распределения — дисперсию удваиваем.'},
+{t:'t-cnn',q:'Почему параметров в свёртке меньше, чем в FC?',a:['Пулинг','Разделение весов: одно ядро на всё изображение','Активации','Не обучаются'],c:1,e:'3×3×3 ядро = 27 весов независимо от размера картинки.'},
+{t:'t-cnn',q:'Max-pooling нужен для…',a:['Увеличения разрешения','Сжатия + устойчивость к малым сдвигам','Добавления каналов','Замены свёртки'],c:1,e:'Максимум по окну: меньше вычислений, больше инвариантности.'},
+{t:'t-cnn',q:'Что увеличит выходную карту при фиксированном входе?',a:['Больший stride','Больший padding + меньший stride','Больше каналов','Большее ядро'],c:1,e:'W_out = (W−K+2P)/S + 1: padding растёт, stride уменьшается → выход больше.'},
+{t:'t-rnn',q:'Дверь forget в LSTM управляет…',a:['Записью новой информации','Долей старой клеточной памяти, которая сохраняется','Выходом','Размерностью входа'],c:1,e:'Cₜ = fₜ⊙Cₜ₋₁ + …: f≈1 — помним долго, f≈0 — стираем.'},
+{t:'t-rnn',q:'Затухающий градиент в RNN означает…',a:['Сеть слишком быстрая','Влияние дальних шагов экспоненциально падает','Нужно больше слоёв','Производная всегда 1'],c:1,e:'Произведение многих якобианов <1 → 0. Долгие зависимости не выучить.'},
+{t:'t-trf',q:'Выход self-attention для токена — это…',a:['Его Value','Взвешенная сумма всех Value через softmax(QKᵀ/√d)','Среднее эмбеддингов','Максимум Keys'],c:1,e:'Каждый токен собирает информацию со всей последовательности.'},
+{t:'t-trf',q:'Зачем делят QKᵀ на √d_k?',a:['Экономия памяти','Чтобы дисперсия не росла и softmax не насыщался','Регуляризация','Скорость'],c:1,e:'Большие d → огромные скалярные произведения → softmax «замерзает».'},
+{t:'t-trf',q:'BERT и GPT отличаются тем, что…',a:['Размер словаря','BERT — encoder (bidirectional), GPT — decoder (causal)','Один для картинок','Ничем'],c:1,e:'BERT маскирует слова и видит весь контекст; GPT видит только прошлое.'},
+{t:'t-trf',q:'Позиционное кодирование нужно, потому что…',a:['Эмбеддинги неточные','Self-attention перестановочно-инвариантен: порядок надо добавить','Ускоряет обучение','Так принято'],c:1,e:'Без позиций «кот ест рыбу» и «рыба ест кота» неразличимы для внимания.'}
+];
+const topicNames={'t-linreg':'Регрессия','t-poly':'Полиномы/SVR','t-logreg':'ЛогРег','t-svm':'SVM','t-bayes':'Байес','t-knn':'k-NN','t-tree':'Деревья','t-ens':'Ансамбли','t-clus':'Кластеризация','t-dim':'PCA/t-SNE','t-apriori':'Apriori','t-rl':'RL','t-core':'DL-ядро','t-cnn':'CNN','t-rnn':'RNN','t-trf':'Трансформеры'};
+let exSel='all',exQ=[],exI=0,exScore=0,exT0=0,exTimer=null;
+function exRenderTopics(){$('#ex_topics').innerHTML=`<button class="btn ${exSel==='all'?'':'ghost'}" onclick="exPick('all')">Все темы</button>`+Object.keys(topicNames).map(k=>`<button class="btn ghost" onclick="exPick('${k}')">${topicNames[k]}</button>`).join('')}
+function exPick(k){exSel=k;exRenderTopics()}
+function exStart(){const n=+$('#ex_n').value;let pool=exSel==='all'?QB:QB.filter(q=>q.t===exSel);exQ=[...pool].sort(()=>Math.random()-0.5).slice(0,n);exI=0;exScore=0;exT0=Date.now();if(exTimer)clearInterval(exTimer);exTimer=setInterval(()=>{const el=$('#ex_time');if(el)el.textContent='⏱ '+Math.floor((Date.now()-exT0)/1000)+'с'},1000);exShow()}
+function exShow(){if(exI>=exQ.length)return exFinish();const q=exQ[exI];$('#ex_area').innerHTML=`<div style="background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:18px;margin:10px 0"><div style="display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap"><span style="font-size:11px;padding:2px 8px;border-radius:4px;border:1px solid var(--ac);color:var(--ac)">Вопрос ${exI+1}/${exQ.length}</span><span style="font-size:11px;padding:2px 8px;border-radius:4px;border:1px solid var(--line);color:#8ba1b6">${topicNames[q.t]}</span><span style="font-size:11px;padding:2px 8px;border-radius:4px;border:1px solid var(--amber);color:var(--amber)">Счёт: ${exScore}</span><span id="ex_time" style="font-family:var(--mono);color:var(--amber);font-size:12px;margin-left:auto"></span></div><h4 style="font-size:15px;margin-bottom:10px">${q.q}</h4>${q.a.map((a,i)=>`<button style="display:block;width:100%;text-align:left;background:var(--panel);border:1px solid var(--line);color:var(--txt);border-radius:8px;padding:10px 14px;margin:6px 0;cursor:pointer;font-size:13px" onclick="exAns(${i})">${String.fromCharCode(65+i)}. ${a}</button>`).join('')}</div>`}
+function exAns(i){const q=exQ[exI];const btns=$$('#ex_area button[onclick^="exAns"]');btns.forEach((b,j)=>{b.disabled=true;b.style.opacity='0.7';if(j===q.c)b.style.borderColor='#34d399';if(j===i&&j!==q.c)b.style.borderColor='#f87171'});if(i===q.c)exScore++;const div=document.createElement('div');div.style.cssText='margin-top:10px;padding:10px;background:#0d141d;border-radius:6px;border-left:3px solid '+(i===q.c?'#34d399':'#f87171')+';font-size:12px';div.innerHTML=(i===q.c?'✅ Верно! ':'❌ Неверно. ')+q.e;$('#ex_area > div:last-child').appendChild(div);const nx=document.createElement('button');nx.className='btn';nx.style.marginTop='10px';nx.textContent=exI+1>=exQ.length?'Результаты →':'Следующий →';nx.onclick=()=>{exI++;exShow()};$('#ex_area > div:last-child').appendChild(nx)}
+function exFinish(){clearInterval(exTimer);const pct=Math.round(exScore/exQ.length*100);$('#ex_area').innerHTML=`<div style="background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:24px;text-align:center;margin:10px 0"><h3 style="font-size:36px;margin:8px 0;color:${pct>=80?'#34d399':pct>=60?'#f5b942':'#f87171'}">${pct}%</h3><p>${exScore}/${exQ.length} · ${Math.floor((Date.now()-exT0)/1000)}с</p><p style="font-size:12px;color:#5c7186">${pct>=80?'🏆 Готов к собеседованию!':pct>=60?'Неплохо, повтори слабые темы.':'Повтори карту знаний и попробуй снова.'}</p><button class="btn alt" onclick="exStart()">↻ Ещё раз</button></div>`}
+exRenderTopics();
+
+/* ================= INIT ================= */
+function initAll(){
+  console.log('ML Trainer v4.1 — Initializing...');
+  try{
+    // Add copy buttons to all code blocks FIRST
+    addCopyButtons();
+    
+    lrGen();lrDraw();rgDraw();
+    plGen();plDraw();
+    lgGen();lgDraw();
+    svData();svTrain();
+    nbDraw();
+    knGen();knDraw();
+    trData();trDraw();
+    rfData();rfBuild();
+    bsGen();bsCompute();bsDraw();
+    kmData();kmDraw();
+    dbData();dbDraw();
+    pcGen();pcDraw();
+    tsGen();tsDraw();
+    apRender();
+    rlDraw();
+    bpDraw();
+    opDraw();
+    cvDraw();
+    lsDraw();
+    atDraw();
+    pgGenData();pgDraw();
+    csvGen('housing');
+    // Typeset MathJax after content loaded
+    if(window.MathJax&&MathJax.typesetPromise)MathJax.typesetPromise().catch(e=>console.warn('MathJax:',e));
+    console.log('✅ All demos initialized!');
+  }catch(e){console.error('❌ Init error:',e)}
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initAll);else initAll();
+const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting&&e.target.classList.contains('topic')){$$('.nlink').forEach(a=>a.classList.toggle('on',a.getAttribute('href')==='#'+e.target.id))}}),{threshold:0.2});
+$$('section.topic').forEach(s=>io.observe(s));
+</script>
+</body>
+</html>
